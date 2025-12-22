@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌙 Lumina Quran
 
-## Getting Started
+Lumina Quran adalah aplikasi web Al-Quran modern yang mengedepankan estetika premium, performa tinggi, dan akurasi teks. Dibangun dengan teknologi web terbaru untuk memberikan pengalaman membaca dan mendengarkan Al-Quran yang khusyuk dan intuitif.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## ✨ Fitur Utama
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- **Mushaf Digital Otentik**: Menggunakan font **LPMQ Isep Misbah** dan **KFGQPC Uthmanic Naskh** untuk tampilan teks Rasm Utsmani yang jernih dan sesuai standar Mushaf Madinah.
+- **Tiga Mode Membaca**:
+  - 📖 **Baca per Surah**: Navigasi daftar 114 surah dengan informasi lengkap.
+  - 📍 **Baca per Ayat**: Tampilan fokus satu ayat untuk tadabbur yang mendalam.
+  - 📄 **Baca per Halaman**: Tampilan replika Mushaf fisik (604 halaman) dengan layout rata kanan-kiri (justified).
+- **Audio Murattal Berkualitas**: Recitation oleh **Syaikh Ali Al-Hudhaify** (Imam Masjid Nabawi) dengan kualitas 128kbps yang jernih, diputar secara verse-by-verse.
+- **Pencarian Canggih**: Sistem pencarian ayat berdasarkan kata kunci dalam Terjemahan Indonesia maupun Teks Arab secara instan.
+- **Tafsir & Markah**: Dilengkapi dengan **Tafsir Kemenag RI** dan fitur **Bookmark** untuk menyimpan kemajuan bacaan Anda.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📡 Sumber Data & API
 
-## Learn More
+Aplikasi ini mengintegrasikan beberapa sumber data terpercaya untuk memastikan reliabilitas:
 
-To learn more about Next.js, take a look at the following resources:
+1.  **[Quran.com API v4](https://api.quran.com/docs)**: Digunakan untuk manajemen data surah, informasi juz, dan mesin pencarian ayat.
+2.  **[Rioastamal Quran JSON](https://github.com/rioastamal/quran-json)**: Sumber utama untuk teks ayat (Utsmani) dan Tafsir Kemenag guna memastikan akurasi karakter dan kecepatan loading.
+3.  **[QuranicAudio Mirrors](https://quranicaudio.com/)**: Penyedia file audio MP3 murattal per ayat yang stabil dan jernih.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Tech Stack & Dependensi
 
-## Deploy on Vercel
+Lumina Quran dikembangkan menggunakan teknologi terkini (berdasarkan `package.json`):
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Core Framework
+- **Next.js**: `16.1.1` (App Router)
+- **React**: `19.2.3`
+- **TypeScript**: `^5`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### State & Data Management
+- **TanStack Query (React Query)**: `^5.90.12`
+- **Zustand**: `^5.0.9` (Client-side state & persistence)
+
+### UI & Styling
+- **Tailwind CSS**: `^4.0.0`
+- **Lucide React**: `^0.562.0` (Icons)
+- **Next Themes**: `^0.4.6` (Dark/Light mode support)
+
+### Media Handling
+- **Howler.js**: `^2.2.4` (Advanced audio playback control)
+
+---
+
+## 🚀 Panduan Pengembang
+
+Ikuti langkah-langkah di bawah ini untuk menjalankan proyek secara lokal:
+
+### ⚙️ Prasyarat
+- **Node.js**: v18.0.0 atau lebih tinggi
+- **npm** atau **yarn**
+
+### 📦 Instalasi
+
+1.  **Clone Repositori**:
+    ```bash
+    git clone https://github.com/muhiqsimui/lumina-quran.git
+    cd lumina-quran
+    ```
+
+2.  **Instal Dependensi**:
+    ```bash
+    npm install
+    ```
+
+3.  **Jalankan Lingkungan Pengembangan**:
+    ```bash
+    npm run dev
+    ```
+    Buka `http://localhost:3000` di browser Anda.
+
+4.  **Build untuk Produksi**:
+    ```bash
+    npm run build
+    npm run start
+    ```
+
+## 📄 Lisensi
+
+Proyek ini dilisensikan di bawah **[Lisensi MIT](LICENSE)**. Anda bebas menggunakan, memodifikasi, dan mendistribusikan kode ini untuk tujuan kebaikan.
+
+---
+Dikembangkan dengan ❤️ untuk kemudahan akses Al-Quran secara digital.
