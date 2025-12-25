@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Book, Layers, List, Bookmark, Search, Settings, CircleDot } from "lucide-react";
+import {
+  Book,
+  Layers,
+  List,
+  Bookmark,
+  Search,
+  Settings,
+  CircleDot,
+} from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
 const menuItems = [
@@ -18,10 +26,11 @@ const menuItems = [
     color: "bg-blue-500/10 text-blue-600",
   },
   {
-    title: "Baca per Halaman",
-    description: "Tampilan Al-Quran mushaf per halaman",
+    title: "(Maintenance) Baca per Halaman",
+    description: "Tampilan Al-Quran mushaf per halaman sedang dalam perbaikan",
     icon: Layers,
-    href: "/page/1",
+    // href: "/page/1",
+    href: "/",
     color: "bg-amber-500/10 text-amber-600",
   },
   {
