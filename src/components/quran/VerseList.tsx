@@ -10,6 +10,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 import { useScrollToAyah } from "@/hooks/useScrollToAyah";
 import { useDebounce } from "@/hooks/useDebounce";
 
+
 interface VerseListProps {
   verses: Verse[];
   chapterId: number;
@@ -18,13 +19,14 @@ interface VerseListProps {
 }
 
 export function VerseList({ 
-  verses, 
+  verses: initialVerses, 
   chapterId, 
   chapterName, 
   highlightAyah 
 }: VerseListProps) {
   const [activeTafsir, setActiveTafsir] = useState<string | null>(null);
   const { lastRead, setLastRead, selectedQari } = useSettingsStore();
+  const [verses, setVerses] = useState<Verse[]>(initialVerses);
   
   // Initialize lastReadAyah from store if we're in the same chapter
   const [lastReadAyah, setLastReadAyah] = useState<number>(() => {
@@ -36,6 +38,7 @@ export function VerseList({
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore();
 
   const isInitialized = useRef(false);
+
 
   // Scroll to highlight or last read on mount
   useEffect(() => {
@@ -111,26 +114,27 @@ export function VerseList({
   // Register navigation callbacks for AudioBar
   useEffect(() => {
     const handleNextAyah = () => {
-      const { repeatMode } = useAudioStore.getState();
+      const { repeatMode, isPlaying } = useAudioStore.getState();
       if (lastReadAyah < verses.length) {
         const nextVerse = verses[lastReadAyah];
-        handlePlay(nextVerse);
+        handlePlay(nextVerse, isPlaying);
       } else if (repeatMode === "all") {
-        handlePlay(verses[0]);
+        handlePlay(verses[0], isPlaying);
       }
     };
 
     const handlePrevAyah = () => {
+      const { isPlaying } = useAudioStore.getState();
       if (lastReadAyah > 1) {
         const prevVerse = verses[lastReadAyah - 2];
-        handlePlay(prevVerse);
+        handlePlay(prevVerse, isPlaying);
       }
     };
 
     setNavigationCallbacks(handleNextAyah, handlePrevAyah);
   }, [lastReadAyah, verses, setNavigationCallbacks]);
 
-  const handlePlay = (verse: Verse) => {
+  const handlePlay = (verse: Verse, autoPlay = true) => {
     if (!selectedQari) return;
 
     const surahPadded = String(chapterId).padStart(3, "0");
@@ -143,7 +147,8 @@ export function VerseList({
       audioUrl,
       chapterName,
       selectedQari.name,
-      verses.length
+      verses.length,
+      autoPlay
     );
 
     setLastReadAyah(verse.verse_number);

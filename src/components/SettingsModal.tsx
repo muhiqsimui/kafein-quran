@@ -302,6 +302,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                 />
               </button>
             </div>
+
           </section>
         </div>
 

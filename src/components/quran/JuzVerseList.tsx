@@ -16,9 +16,10 @@ interface JuzVerseListProps {
   juzId: number;
 }
 
-export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
+export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVerseListProps) {
   const [activeTafsir, setActiveTafsir] = useState<string | null>(null);
   const { selectedQari, setLastRead, fontFamily } = useSettingsStore();
+  const [verses, setVerses] = useState<Verse[]>(initialVerses);
   const fontClass = getArabicFontClass(fontFamily);
   const { setAudio, currentAyah, setNavigationCallbacks } = useAudioStore();
   const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore();
@@ -29,7 +30,7 @@ export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
     return chapters.find((c) => c.id === chapterId)?.name_simple || "";
   };
 
-  const handlePlay = (verse: Verse) => {
+  const handlePlay = (verse: Verse, autoPlay = true) => {
     if (!selectedQari) return;
 
     const [chapterIdStr, verseNumStr] = verse.verse_key.split(":");
@@ -38,30 +39,21 @@ export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
     const versePadded = String(verse.verse_number).padStart(3, "0");
     const audioUrl = `https://everyayah.com/data/${selectedQari.reciter_id}/${surahPadded}${versePadded}.mp3`;
 
-    setAudio(
+      setAudio(
       chapterId,
       verse.verse_number,
       audioUrl,
       getChapterName(chapterId),
       selectedQari.name,
-      // Pass total verses of THIS surah, assuming audio logic handles it. 
-      // If we are in Juz view, next audio track should ideally be the next verse in the LIST.
-      // But standard AudioStore might stick to one Surah.
-      // For now, let's pass a large number or current verses length? 
-      // Actually, useAudioStore logic might loop within the chapterId if we verify strictly.
-      // Let's pass verses.length of the JUZ context? 
-      // No, let's keep it simple:
-      verses.length
+      verses.length,
+      autoPlay
     );
   };
 
   // Implement navigation callbacks for AudioBar to move to next/prev verse in this LIST
   useEffect(() => {
     const handleNextAyah = () => {
-      // Find current index
-      // Since currentAyah is just a number, it's ambiguous in multi-surah context (Juz).
-      // But useAudioStore tracks `currentSurah` (chapterId) too.
-      const { currentSurah: playingChapterId, currentAyah: playingVerseNum } = useAudioStore.getState();
+      const { repeatMode, isPlaying, currentSurah: playingChapterId, currentAyah: playingVerseNum } = useAudioStore.getState();
       
       const currentIndex = verses.findIndex(v => {
         const [cId, vId] = v.verse_key.split(":");
@@ -69,24 +61,27 @@ export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
       });
 
       if (currentIndex !== -1 && currentIndex < verses.length - 1) {
-        handlePlay(verses[currentIndex + 1]);
+        handlePlay(verses[currentIndex + 1], isPlaying);
+      } else if (repeatMode === "all" && verses.length > 0) {
+        handlePlay(verses[0], isPlaying);
       }
     };
 
     const handlePrevAyah = () => {
-        const { currentSurah: playingChapterId, currentAyah: playingVerseNum } = useAudioStore.getState();
+        const { isPlaying, currentSurah: playingChapterId, currentAyah: playingVerseNum } = useAudioStore.getState();
         const currentIndex = verses.findIndex(v => {
           const [cId, vId] = v.verse_key.split(":");
           return parseInt(cId) === playingChapterId && parseInt(vId) === playingVerseNum;
         });
   
         if (currentIndex > 0) {
-          handlePlay(verses[currentIndex - 1]);
+          handlePlay(verses[currentIndex - 1], isPlaying);
         }
     };
 
     setNavigationCallbacks(handleNextAyah, handlePrevAyah);
   }, [verses, setNavigationCallbacks]);
+
 
   const handleBookmark = (verse: Verse) => {
     const chapterId = parseInt(verse.verse_key.split(":")[0]);

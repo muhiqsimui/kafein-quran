@@ -20,7 +20,8 @@ interface AudioState {
     url: string,
     surahName: string,
     qoriName?: string,
-    totalVerses?: number
+    totalVerses?: number,
+    autoPlay?: boolean
   ) => void;
   setNavigationCallbacks: (
     onNext: (() => void) | null,
@@ -47,7 +48,7 @@ export const useAudioStore = create<AudioState>((set) => ({
   repeatMode: "off",
   autoAdvance: false,
 
-  setAudio: (surah, ayah, url, surahName, qoriName, totalVerses) =>
+  setAudio: (surah, ayah, url, surahName, qoriName, totalVerses, autoPlay = true) =>
     set({
       currentSurah: surah,
       currentSurahName: surahName,
@@ -55,7 +56,7 @@ export const useAudioStore = create<AudioState>((set) => ({
       audioUrl: url,
       qoriName: qoriName || null,
       totalVerses: totalVerses || null,
-      isPlaying: true,
+      isPlaying: autoPlay,
     }),
 
   setNavigationCallbacks: (onNext, onPrev) =>

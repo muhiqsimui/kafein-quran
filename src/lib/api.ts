@@ -235,4 +235,5 @@ export async function getTafsir(ayahKey: string): Promise<TafsirResponse> {
     console.error("Tafsir fetch error:", error);
     throw new Error("Gagal memuat tafsir.");
   }
-} // End of file
+}
+
