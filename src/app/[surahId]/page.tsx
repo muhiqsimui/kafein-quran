@@ -14,10 +14,13 @@ export async function generateStaticParams() {
 
 interface SurahPageProps {
   params: Promise<{ surahId: string }>;
+  searchParams: Promise<{ highlight?: string }>;
 }
 
-export default async function SurahPage({ params }: SurahPageProps) {
+export default async function SurahPage({ params, searchParams }: SurahPageProps) {
   const { surahId } = await params;
+  const { highlight } = await searchParams;
+  const highlightAyah = highlight ? parseInt(highlight, 10) : undefined;
 
   try {
     const chaptersData = await getChapters();
@@ -80,6 +83,7 @@ export default async function SurahPage({ params }: SurahPageProps) {
             verses={verses}
             chapterId={chapter.id}
             chapterName={chapter.name_simple}
+            highlightAyah={highlightAyah}
           />
         </section>
 

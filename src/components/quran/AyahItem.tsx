@@ -6,6 +6,7 @@ import { useSettingsStore } from "@/store/useSettingsStore";
 interface AyahItemProps {
   verse: Verse;
   isActive?: boolean;
+  isHighlighted?: boolean;
   isBookmarked?: boolean;
   onPlay?: () => void;
   onTafsir?: () => void;
@@ -15,6 +16,7 @@ interface AyahItemProps {
 export function AyahItem({
   verse,
   isActive,
+  isHighlighted,
   isBookmarked,
   onPlay,
   onTafsir,
@@ -29,9 +31,10 @@ export function AyahItem({
       data-verse-number={verse.verse_number}
       className={cn(
         "group p-6 rounded-2xl border transition-all duration-500 space-y-6",
-        isActive
+        isActive || isHighlighted
           ? "border-primary bg-primary/5 shadow-lg shadow-primary/5 ring-1 ring-primary/20"
-          : "border-border bg-card/40 hover:border-primary/20 hover:bg-card/60"
+          : "border-border bg-card/40 hover:border-primary/20 hover:bg-card/60",
+        isHighlighted && "highlight-pulse"
       )}
     >
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">

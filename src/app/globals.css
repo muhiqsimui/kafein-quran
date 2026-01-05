@@ -137,4 +137,21 @@
   :fullscreen .max-w-4xl {
     padding-bottom: 3rem !important;
   }
+
+  /* Highlight pulse animation for search results */
+  @keyframes highlight-pulse {
+    0%, 100% {
+      border-color: hsla(var(--primary), 0.2);
+      background-color: hsla(var(--primary), 0.05);
+    }
+    50% {
+      border-color: hsla(var(--primary), 0.5);
+      background-color: hsla(var(--primary), 0.1);
+      box-shadow: 0 0 15px hsla(var(--primary), 0.1);
+    }
+  }
+
+  .highlight-pulse {
+    animation: highlight-pulse 2s ease-in-out;
+  }
 }
