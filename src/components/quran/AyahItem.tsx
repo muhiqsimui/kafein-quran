@@ -1,5 +1,5 @@
 import { Verse } from "@/types";
-import { cn } from "@/lib/utils";
+import { cn, normalizeQuranText } from "@/lib/utils";
 import { Play, BookOpen, Bookmark } from "lucide-react";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
@@ -76,28 +76,36 @@ export function AyahItem({
 
         <div className="text-right w-full overflow-visible">
           <div
-            className="font-arabic leading-[3.2] md:leading-[3.8] text-foreground tracking-normal text-right antialiased py-6"
+            className="font-lpmq leading-[2.5] md:leading-[3.0] text-foreground tracking-normal text-right antialiased py-6"
             dir="rtl"
-            style={{ fontSize: `${arabicFontSize}px` }}
+            style={{ 
+              fontSize: `${arabicFontSize}px`,
+              fontFeatureSettings: '"rlig" 1, "calt" 1, "liga" 1',
+              textRendering: 'optimizeLegibility'
+            }}
           >
-            {verse.text_uthmani}
+            {normalizeQuranText(verse.text_uthmani || "")}
           </div>
         </div>
       </div>
 
       <div className="space-y-6 pt-4">
-        {showWordByWord && (
+        {showWordByWord && verse.words && verse.words.length > 0 && (
           <div className="flex flex-wrap gap-3" dir="rtl">
             {verse.words.map((word) => (
               <div key={word.id} className="group/word relative">
                 <span
                   className="font-arabic text-foreground/80 group-hover/word:text-primary transition-colors cursor-default leading-[2.5]"
-                  style={{ fontSize: `${arabicFontSize * 0.75}px` }}
+                  style={{ 
+                    fontSize: `${arabicFontSize * 0.75}px`,
+                    fontFeatureSettings: '"rlig" 1, "calt" 1, "liga" 1',
+                    textRendering: 'optimizeLegibility'
+                  }}
                 >
-                  {word.text_uthmani}
+                  {normalizeQuranText(word.text_uthmani)}
                 </span>
                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-popover text-popover-foreground text-[10px] rounded opacity-0 group-hover/word:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-border shadow-md">
-                  {word.translation.text}
+                  {word?.translation?.text}
                 </div>
               </div>
             ))}

@@ -1,4 +1,4 @@
-import { getVersesByPage, getChapters } from "@/lib/api";
+import { getVersesByPageLocal, getChaptersLocal } from "@/lib/quran-service";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { PageTracker } from "@/components/quran/PageTracker";
@@ -11,9 +11,9 @@ interface PageReadingProps {
 export default async function PageReading({ params }: PageReadingProps) {
   const { pageId } = await params;
   const currentPage = parseInt(pageId);
-  const data = await getVersesByPage(currentPage);
+  const data = await getVersesByPageLocal(currentPage);
   const verses = data.verses;
-  const { chapters } = await getChapters();
+  const { chapters } = await getChaptersLocal();
 
   // Calculate juz from verses
   const currentJuz = verses[0]?.juz_number || Math.ceil(currentPage / 20);
@@ -36,7 +36,7 @@ export default async function PageReading({ params }: PageReadingProps) {
       <div className="w-full h-full flex-1 flex flex-col justify-start sm:justify-center">
         <div
           // Mobile: Font-size sedikit lebih kecil (24px) agar tidak terlalu banyak line-break, sm: 28px
-          className="font-arabic text-[24px] sm:text-[28px] leading-[2.4] sm:leading-[2.2] text-justify w-full"
+          className="font-lpmq text-[24px] sm:text-[28px] leading-[2.4] sm:leading-[2.2] text-justify w-full"
           dir="rtl"
           style={{ textAlignLast: "center" }}
         >
@@ -60,7 +60,7 @@ export default async function PageReading({ params }: PageReadingProps) {
                     {/* Surah Header: Dibuat responsif tinggi dan font-nya */}
                     <div className="w-full min-h-[70px] sm:h-24 bg-[url('/surah-header.png')] bg-contain bg-no-repeat bg-center flex flex-col items-center justify-center border-y border-black/5 relative py-2">
                        <div className="absolute inset-x-0 h-full border-y-[2px] sm:border-y-[3px] border-double border-[#eaddcf]" />
-                       <div className="z-10 bg-[#fffcf2] px-4 sm:px-6 font-arabic text-xl sm:text-3xl text-black font-bold mb-0.5 sm:mb-1">
+                       <div className="z-10 bg-[#fffcf2] px-4 sm:px-6 font-lpmq text-xl sm:text-3xl text-black font-bold mb-0.5 sm:mb-1">
                          سورة {chapter?.name_arabic || ""}
                        </div>
                        <div className="z-10 bg-[#fffcf2] px-2 font-serif text-[10px] sm:text-sm text-[#8a8a8a] tracking-widest uppercase">
@@ -69,7 +69,7 @@ export default async function PageReading({ params }: PageReadingProps) {
                     </div>
                     {/* Bismillah: Only show if not part of the ayah text */}
                     {showHeaderBismillah && (
-                      <div className="text-center font-arabic text-2xl sm:text-3xl mt-4 mb-2 sm:mt-6 sm:mb-4 text-black/90">
+                      <div className="text-center font-lpmq text-2xl sm:text-3xl mt-4 mb-2 sm:mt-6 sm:mb-4 text-black/90">
                         بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                       </div>
                     )}

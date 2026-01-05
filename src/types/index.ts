@@ -35,7 +35,7 @@ export interface Verse {
   text_indopak?: string;
   juz_number: number;
   page_number: number;
-  words: Word[];
+  words?: Word[];
   translations: Translation[];
 }
 
@@ -115,3 +115,5 @@ export interface SearchResponse {
     results: SearchResult[];
   };
 }
+
+export type SearchParams = { [key: string]: string | string[] | undefined };

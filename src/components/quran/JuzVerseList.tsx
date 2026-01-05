@@ -164,7 +164,7 @@ export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
                  <div className="w-full block mt-12 mb-8 animate-in slide-in-from-bottom-5 duration-700" dir="rtl">
                     <div className="w-full min-h-[80px] sm:h-28 bg-[url('/surah-header.png')] bg-contain bg-no-repeat bg-center flex flex-col items-center justify-center border-y border-black/5 relative py-2">
                          <div className="absolute inset-x-0 h-full border-y-[2px] sm:border-y-[3px] border-double border-[#eaddcf]" />
-                         <div className="z-10 bg-[#fffcf2] px-6 font-arabic text-2xl sm:text-4xl text-black font-bold mb-1 drop-shadow-sm">
+                         <div className="z-10 bg-[#fffcf2] px-6 font-lpmq text-2xl sm:text-4xl text-black font-bold mb-1 drop-shadow-sm">
                            سورة {chapter?.name_arabic || ""}
                          </div>
                          <div className="z-10 bg-[#fffcf2] px-3 font-serif text-xs sm:text-sm text-[#8a8a8a] tracking-[0.2em] uppercase">
@@ -172,7 +172,7 @@ export function JuzVerseList({ verses, chapters, juzId }: JuzVerseListProps) {
                          </div>
                     </div>
                     {showBismillah && (
-                        <div className="text-center font-arabic text-2xl sm:text-3xl mt-6 mb-4 text-black/80">
+                        <div className="text-center font-lpmq text-2xl sm:text-3xl mt-6 mb-4 text-black/80">
                             بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
                         </div>
                     )}

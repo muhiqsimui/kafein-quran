@@ -1,40 +1,46 @@
-import { getChapters, getChapter, getVerses } from "@/lib/api";
+import { SearchParams } from "@/types";
+import { getVersesLocal, getChaptersLocal } from "@/lib/quran-service";
+import { normalizeQuranText } from "@/lib/utils";
 import { VerseList } from "@/components/quran/VerseList";
 import { FloatingControls } from "@/components/quran/FloatingControls";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-export async function generateStaticParams() {
-  const { chapters } = await getChapters();
-  return chapters.map((chapter) => ({
-    surahId: chapter.id.toString(),
-  }));
-}
-
 interface SurahPageProps {
   params: Promise<{ surahId: string }>;
-  searchParams: Promise<{ highlight?: string }>;
+  searchParams: Promise<SearchParams>;
+}
+
+export async function generateStaticParams() {
+  const { chapters } = await getChaptersLocal();
+  return chapters.map((chapter) => ({
+    surahId: String(chapter.id),
+  }));
 }
 
 export default async function SurahPage({ params, searchParams }: SurahPageProps) {
   const { surahId } = await params;
   const { highlight } = await searchParams;
-  const highlightAyah = highlight ? parseInt(highlight, 10) : undefined;
+  const highlightStr = Array.isArray(highlight) ? highlight[0] : highlight;
+  const highlightAyah = highlightStr ? parseInt(highlightStr, 10) : undefined;
+  const chapterId = parseInt(surahId);
 
   try {
-    const chaptersData = await getChapters();
-    const chapterData = await getChapter(surahId);
-    const verseData = await getVerses(surahId);
+    const { chapters } = await getChaptersLocal();
+    const chapter = chapters.find((c) => c.id === chapterId);
+    
+    if (!chapter) {
+      notFound();
+    }
 
-    const chapter = chapterData.chapter;
-    const verses = verseData.verses;
+    const { verses } = await getVersesLocal(chapterId);
 
     return (
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 min-h-screen pb-20 sm:pb-32">
         {/* Floating Controls */}
         <FloatingControls
-          chapters={chaptersData.chapters}
+          chapters={chapters}
           currentChapterId={chapter.id}
           currentVerseNumber={1}
           totalVerses={chapter.verses_count}
@@ -63,15 +69,15 @@ export default async function SurahPage({ params, searchParams }: SurahPageProps
             </p>
           </div>
 
-          <div className="font-arabic text-5xl sm:text-6xl text-primary py-4 sm:py-6 drop-shadow-sm">
-            {chapter.name_arabic}
+          <div className="font-lpmq text-5xl sm:text-6xl text-primary py-4 sm:py-6 drop-shadow-sm">
+            {normalizeQuranText(chapter.name_arabic)}
           </div>
 
           {chapter.bismillah_pre && (
-            <div className="font-arabic text-3xl sm:text-5xl text-foreground/80 pt-8 pb-6 sm:pt-16 sm:pb-12 border-t border-border/50 w-full mt-6 sm:mt-8 leading-relaxed text-center flex justify-center items-center">
+            <div className="font-lpmq text-3xl sm:text-5xl text-foreground/80 pt-8 pb-6 sm:pt-16 sm:pb-12 border-t border-border/50 w-full mt-6 sm:mt-8 leading-relaxed text-center flex justify-center items-center">
               <span className="inline-block h-auto py-2">
                 {" "}
-                بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ{" "}
+                {normalizeQuranText("بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيْمِ")}{" "}
               </span>
             </div>
           )}

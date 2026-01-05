@@ -115,6 +115,13 @@
 @layer utilities {
   .font-arabic {
     font-family: "LPMQ Isep Misbah", "Uthman Hafs", serif;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "rlig" 1, "calt" 1, "liga" 1;
+  }
+  .font-lpmq {
+    font-family: "LPMQ Isep Misbah", serif;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "rlig" 1, "calt" 1, "liga" 1;
   }
   .arabic-text {
     @apply py-6 leading-[3];

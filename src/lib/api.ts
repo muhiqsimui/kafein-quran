@@ -37,9 +37,7 @@ export async function searchVerses(
   page: number = 1
 ): Promise<SearchResponse> {
   const res = await fetch(
-    `${API_BASE_URL}/search?q=${encodeURIComponent(
-      query
-    )}&language=${DEFAULT_LANGUAGE}&size=20&page=${page}`
+    `/api/search?q=${encodeURIComponent(query)}&page=${page}`
   );
   if (!res.ok) throw new Error("Failed to search verses");
   return res.json();

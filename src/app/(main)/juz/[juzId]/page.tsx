@@ -1,4 +1,4 @@
-import { getVersesByJuz, getChapters } from "@/lib/api";
+import { getVersesByJuzLocal, getChaptersLocal } from "@/lib/quran-service";
 import { ChevronRight, ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { JuzVerseList } from "@/components/quran/JuzVerseList";
@@ -10,9 +10,9 @@ interface JuzReadingProps {
 export default async function JuzReading({ params }: JuzReadingProps) {
   const { juzId } = await params;
   const currentJuz = parseInt(juzId);
-  const data = await getVersesByJuz(currentJuz);
+  const data = await getVersesByJuzLocal(currentJuz);
   const verses = data.verses;
-  const { chapters } = await getChapters();
+  const { chapters } = await getChaptersLocal();
 
   return (
     <div className="max-w-4xl mx-auto min-h-screen pb-20 pt-4 px-2 sm:px-0 animate-in fade-in duration-700">

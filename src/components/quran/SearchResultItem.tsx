@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { SearchResult } from '@/types';
 import { Book, ChevronRight } from 'lucide-react';
+import { normalizeQuranText } from '@/lib/utils';
 
 interface SearchResultItemProps {
   result: SearchResult;
@@ -31,7 +32,7 @@ export function SearchResultItem({ result }: SearchResultItemProps) {
               className="text-right font-arabic text-2xl leading-loose"
               dir="rtl"
             >
-              {result.text}
+              {normalizeQuranText(result.text)}
             </p>
             
             <div 
