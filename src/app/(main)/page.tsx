@@ -26,11 +26,10 @@ const menuItems = [
     color: "bg-blue-500/10 text-blue-600",
   },
   {
-    title: "(Maintenance) Baca per Halaman",
-    description: "Tampilan Al-Quran mushaf per halaman sedang dalam perbaikan",
+    title: "Baca per Halaman",
+    description: "Tampilan Al-Quran mushaf per halaman",
     icon: Layers,
-    // href: "/page/1",
-    href: "/",
+    href: "/page/1",
     color: "bg-amber-500/10 text-amber-600",
   },
   {

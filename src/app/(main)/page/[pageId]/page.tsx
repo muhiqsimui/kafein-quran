@@ -44,6 +44,14 @@ export default async function PageReading({ params }: PageReadingProps) {
             const isSurahStart = verse.verse_number === 1;
             const chapterId = parseInt(verse.verse_key.split(":")[0]);
             const chapter = chapters.find((c) => c.id === chapterId);
+            // Only show decorative header Bismillah if text doesn't start with it
+            // This prevents doubles while ensuring we rely on the correct API text for Bismillah
+            const verseText = verse.text_uthmani || "";
+            const hasBismillahInText = verseText.includes("بِسْمِ ٱللَّهِ");
+            const showHeaderBismillah = isSurahStart && chapterId !== 1 && chapterId !== 9 && !hasBismillahInText;
+            
+            // For Al-Fatihah or if text has Bismillah, we might want to ensure it's displayed nicely 
+            // but usually the main text rendering handles it.
 
             return (
               <span key={verse.id} className="inline">
@@ -51,26 +59,25 @@ export default async function PageReading({ params }: PageReadingProps) {
                   <div className="w-full block my-6 sm:my-8" dir="rtl">
                     {/* Surah Header: Dibuat responsif tinggi dan font-nya */}
                     <div className="w-full min-h-[70px] sm:h-24 bg-[url('/surah-header.png')] bg-contain bg-no-repeat bg-center flex flex-col items-center justify-center border-y border-black/5 relative py-2">
-                      <div className="absolute inset-x-0 h-full border-y-[2px] sm:border-y-[3px] border-double border-[#eaddcf]" />
-                      <div className="z-10 bg-[#fffcf2] px-4 sm:px-6 font-arabic text-xl sm:text-3xl text-black font-bold mb-0.5 sm:mb-1">
-                        سورة {chapter?.name_arabic || ""}
-                      </div>
-                      <div className="z-10 bg-[#fffcf2] px-2 font-serif text-[10px] sm:text-sm text-[#8a8a8a] tracking-widest uppercase">
-                        {chapter?.name_simple || ""}
-                      </div>
+                       <div className="absolute inset-x-0 h-full border-y-[2px] sm:border-y-[3px] border-double border-[#eaddcf]" />
+                       <div className="z-10 bg-[#fffcf2] px-4 sm:px-6 font-arabic text-xl sm:text-3xl text-black font-bold mb-0.5 sm:mb-1">
+                         سورة {chapter?.name_arabic || ""}
+                       </div>
+                       <div className="z-10 bg-[#fffcf2] px-2 font-serif text-[10px] sm:text-sm text-[#8a8a8a] tracking-widest uppercase">
+                         {chapter?.name_simple || ""}
+                       </div>
                     </div>
-                    {/* Bismillah: Ukuran disesuaikan mobile */}
-                    <div className="text-center font-arabic text-2xl sm:text-3xl mt-4 mb-2 sm:mt-6 sm:mb-4 text-black/90">
-                      بسم الله الرحمن الرحيم
-                    </div>
+                    {/* Bismillah: Only show if not part of the ayah text */}
+                    {showHeaderBismillah && (
+                      <div className="text-center font-arabic text-2xl sm:text-3xl mt-4 mb-2 sm:mt-6 sm:mb-4 text-black/90">
+                        بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ
+                      </div>
+                    )}
                   </div>
                 )}
 
                 <span className="inline">
-                  {(verse.text_uthmani || "").replace(
-                    "بِسْمِ ٱللَّهِ ٱلرَّحْمَـٰنِ ٱلرَّحِيمِ",
-                    ""
-                  )}
+                  {verse.text_uthmani}
                 </span>
 
                 {/* Nomor Ayat Marker */}

@@ -111,13 +111,53 @@ export async function getVerses(
 export async function getVersesByPage(
   pageNumber: number | string
 ): Promise<VersesResponse> {
-  // Rioastamal doesn't provide page-based data easily.
-  // For now, we fallback to quran.com but this might still have the rendering issues the user complained about.
+  // 1. Fetch the structure (verses list) from Quran.com to know which verses are on this page
   const res = await fetch(
-    `${API_BASE_URL}/verses/by_page/${pageNumber}?language=${DEFAULT_LANGUAGE}&words=true&translations=${DEFAULT_TRANSLATION_ID}&fields=text_uthmani`
+    `${API_BASE_URL}/verses/by_page/${pageNumber}?language=${DEFAULT_LANGUAGE}&words=true&translations=${DEFAULT_TRANSLATION_ID}`
   );
   if (!res.ok) throw new Error("Failed to fetch verses by page");
-  return res.json();
+  const data = await res.json();
+
+  // 2. Identify unique chapters on this page
+  const chapterIds = new Set<number>();
+  data.verses.forEach((v: any) => {
+    const chapterId = parseInt(v.verse_key.split(":")[0]);
+    chapterIds.add(chapterId);
+  });
+
+  // 3. Fetch text from Rioastamal for these chapters (to ensure consistency with Surah view)
+  const chapterTexts: Record<number, Record<string, string>> = {};
+  
+  await Promise.all(
+    Array.from(chapterIds).map(async (chapterId) => {
+      try {
+        const rRes = await fetch(`${RIOASTAMAL_URL}/surah/${chapterId}.json`);
+        if (rRes.ok) {
+          const rData = await rRes.json();
+          const surahData = rData[String(chapterId)];
+          chapterTexts[chapterId] = surahData.text;
+        }
+      } catch (e) {
+        console.error(`Failed to fetch Rioastamal text for chapter ${chapterId}`, e);
+      }
+    })
+  );
+
+  // 4. Map the Rioastamal text to the Quran.com verse objects
+  data.verses = data.verses.map((v: any) => {
+    const [chapterIdStr, verseNumStr] = v.verse_key.split(":");
+    const chapterId = parseInt(chapterIdStr);
+    
+    // Retrieve text from Rioastamal if available, otherwise fallback to existing
+    const rioastamalText = chapterTexts[chapterId]?.[verseNumStr];
+    
+    return {
+      ...v,
+      text_uthmani: rioastamalText || v.text_uthmani
+    };
+  });
+  
+  return data;
 }
 
 export async function getVersesByJuz(
@@ -142,17 +182,15 @@ export async function getTafsir(ayahKey: string): Promise<TafsirResponse> {
     const surahData = data[surahId];
 
     // Rioastamal structure: surahData.tafsir.id.kemenag.text[verseNum]
-    // Use optional chaining carefully
     const tafsirText = surahData?.tafsir?.id?.kemenag?.text?.[verseNum];
 
     if (!tafsirText) {
       throw new Error("Tafsir not found for this verse");
     }
 
-    // Return in the format expected by the UI (TafsirResponse)
     return {
       tafsir: {
-        id: 33, // Kemenag ID
+        id: 33,
         resource_id: 33,
         text: tafsirText,
       },
@@ -161,4 +199,4 @@ export async function getTafsir(ayahKey: string): Promise<TafsirResponse> {
     console.error("Tafsir fetch error:", error);
     throw new Error("Gagal memuat tafsir.");
   }
-}
+} // End of file
