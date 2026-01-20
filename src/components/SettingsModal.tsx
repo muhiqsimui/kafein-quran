@@ -294,8 +294,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
         <div className="border-t border-border p-4 text-center text-xs text-muted-foreground bg-background/50 sticky bottom-0">
           Pengaturan disimpan otomatis ✓
+          
+          <br/>
+          
+          <div className="text-[8px] mt-2">
+          Lumina Quran v1.0.0 • Dibuat oleh{" "}
+          <a target="__blank" href="https://github.com/muhiqsimui">
+            Muhammad Iqbal atau @muhiqsimui.
+          </a>
+          </div>
         </div>
+        
       </div>
+
     </>
   );
 }

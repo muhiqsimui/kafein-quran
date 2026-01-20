@@ -41,6 +41,15 @@ export default function PrayerTimesPage() {
     return () => clearInterval(timer);
   }, []);
 
+  const saveToLocal = (city: string, country: string, lat?: string, lon?: string) => {
+    localStorage.setItem("user-location", JSON.stringify({ city, country, lat, lon }));
+  };
+
+  const getFromLocal = () => {
+    const saved = localStorage.getItem("user-location");
+    return saved ? JSON.parse(saved) : null;
+  };
+
   const initData = async () => {
     setLoading(true);
     setError(null);
@@ -49,7 +58,17 @@ export default function PrayerTimesPage() {
       // Fetch initial cities for suggestions
       fetchCitiesForSuggestion().then(setAllCities);
 
-      const loc = await fetchUserLocation();
+      // Check local storage first
+      const savedLoc = getFromLocal();
+      let loc;
+      
+      if (savedLoc) {
+        loc = savedLoc;
+        setIsManualLocation(true);
+      } else {
+        loc = await fetchUserLocation();
+      }
+
       setLocation({ city: loc.city, country: loc.country });
       
       // Use lat/lon if available for better accuracy, otherwise city/country
@@ -82,12 +101,19 @@ export default function PrayerTimesPage() {
     setIsManualLocation(true);
     try {
       // Use lat/lon if available for worldwide accuracy
-      const cityParam = (typeof cityObj !== 'string' && cityObj.lat) ? cityObj.lat : cityName;
-      const countryParam = (typeof cityObj !== 'string' && cityObj.lon) ? cityObj.lon : countryName;
+      const lat = (typeof cityObj !== 'string' && cityObj.lat) ? cityObj.lat : undefined;
+      const lon = (typeof cityObj !== 'string' && cityObj.lon) ? cityObj.lon : undefined;
+      
+      const cityParam = lat || cityName;
+      const countryParam = lon || countryName;
 
       const data = await fetchPrayerTimes(cityParam, countryParam);
       setPrayerData(data);
       setLocation({ city: cityName, country: countryName || data.meta.timezone });
+      
+      // Save to local storage
+      saveToLocal(cityName, countryName || data.meta.timezone, lat, lon);
+      
       setError(null);
     } catch (err) {
       setError(`Gagal mengambil jadwal untuk "${cityName}". Coba nama kota yang berbeda.`);
@@ -347,7 +373,10 @@ export default function PrayerTimesPage() {
 
       <div className="text-center pt-4">
         <button 
-          onClick={initData}
+          onClick={() => {
+            localStorage.removeItem("user-location");
+            initData();
+          }}
           className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 mx-auto"
         >
           <RefreshCw className="w-3 h-3" />
