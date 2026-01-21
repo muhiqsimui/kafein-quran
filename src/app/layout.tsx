@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { AudioBar } from "@/components/player/AudioBar";
+import { MemoizationToggle } from "@/components/quran/MemoizationToggle";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,6 +27,7 @@ export default function RootLayout({
         <Providers>
           {children}
           <AudioBar />
+          <MemoizationToggle />
         </Providers>
       </body>
     </html>

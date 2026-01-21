@@ -2,7 +2,7 @@
 
 import { useSettingsStore } from "@/store/useSettingsStore";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Monitor, Type, Eye, Volume2 } from "lucide-react";
+import { Moon, Sun, Monitor, Type, Eye, Volume2, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -24,6 +24,10 @@ export default function SettingsPage() {
     selectedQariId,
     selectedQari,
     setSelectedQari,
+    memoizationMode,
+    setMemoizationMode,
+    showTranslation,
+    setShowTranslation,
   } = useSettingsStore();
 
   const [qaris, setQaris] = useState<Qari[]>([]);
@@ -148,6 +152,67 @@ export default function SettingsPage() {
               >
                 Dengan nama Allah Yang Maha Pengasih, Maha Penyayang.
               </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-4 border-t border-border pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Eye className="w-5 h-5 text-primary" />
+            <h2 className="font-semibold px-1">Tampilan & Fitur</h2>
+          </div>
+
+          <div className="space-y-4">
+            {/* Translation Toggle */}
+            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary font-bold text-xs">ID</div>
+                <div>
+                  <div className="text-sm font-semibold">Tampilkan Terjemahan</div>
+                  <p className="text-xs text-muted-foreground">Tampilkan teks terjemahan di bawah ayat</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTranslation(!showTranslation)}
+                className={cn(
+                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                  showTranslation ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <span
+                  className={cn(
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    showTranslation ? "translate-x-5" : "translate-x-0"
+                  )}
+                />
+              </button>
+            </div>
+
+            {/* Memoization Mode Toggle */}
+            <div className="flex items-center justify-between p-4 bg-card border border-border rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Brain className="w-4 h-4" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold">Mode Menghafal</div>
+                  <p className="text-xs text-muted-foreground">Aktifkan tombol bantuan untuk menyembunyikan bacaan</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setMemoizationMode(!memoizationMode)}
+                className={cn(
+                  "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                  memoizationMode ? "bg-primary" : "bg-muted"
+                )}
+              >
+                <span
+                  className={cn(
+                    "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                    memoizationMode ? "translate-x-5" : "translate-x-0"
+                  )}
+                />
+              </button>
             </div>
           </div>
         </div>

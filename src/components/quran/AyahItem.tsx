@@ -26,7 +26,8 @@ export function AyahItem({
     arabicFontSize, 
     translationFontSize, 
     fontFamily,
-    showTranslation
+    showTranslation,
+    isTextHidden,
   } = useSettingsStore();
 
   const fontClass = getArabicFontClass(fontFamily);
@@ -84,7 +85,8 @@ export function AyahItem({
           <div
             className={cn(
               fontClass,
-              "leading-[2.5] md:leading-[3.0] text-foreground tracking-normal text-right antialiased py-6"
+              "leading-[2.5] md:leading-[3.0] text-foreground tracking-normal text-right antialiased py-6 transition-all duration-500",
+              isTextHidden && "blur-md opacity-20 select-none pointer-events-none"
             )}
             dir="rtl"
             style={{ 
@@ -102,7 +104,10 @@ export function AyahItem({
 
         {showTranslation && verse.translations && verse.translations.length > 0 && (
           <p
-            className="text-muted-foreground leading-relaxed transition-all"
+            className={cn(
+              "text-muted-foreground leading-relaxed transition-all duration-500",
+              isTextHidden && "blur-sm opacity-10 select-none pointer-events-none"
+            )}
             style={{ fontSize: `${translationFontSize}px` }}
           >
             {verse.translations[0].text.replace(/<(?:.|\n)*?>/gm, "")}

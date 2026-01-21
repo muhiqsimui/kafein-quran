@@ -24,6 +24,8 @@ interface SettingsState {
   fontFamily: string;
   showTranslation: boolean;
   mushafMode: MushafMode;
+  memoizationMode: boolean;
+  isTextHidden: boolean;
 
   // Actions
   setArabicFontSize: (size: number) => void;
@@ -33,6 +35,9 @@ interface SettingsState {
   setFontFamily: (font: string) => void;
   setShowTranslation: (show: boolean) => void;
   setMushafMode: (mode: MushafMode) => void;
+  setMemoizationMode: (enabled: boolean) => void;
+  setIsTextHidden: (hidden: boolean) => void;
+  toggleTextVisibility: () => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -51,6 +56,8 @@ export const useSettingsStore = create<SettingsState>()(
       fontFamily: "lpmq",
       showTranslation: true,
       mushafMode: "kemenag", // Default to Kemenag as requested
+      memoizationMode: false,
+      isTextHidden: false,
 
       setArabicFontSize: (size) => set({ arabicFontSize: size }),
       setTranslationFontSize: (size) => set({ translationFontSize: size }),
@@ -60,6 +67,10 @@ export const useSettingsStore = create<SettingsState>()(
       setFontFamily: (font) => set({ fontFamily: font }),
       setShowTranslation: (show) => set({ showTranslation: show }),
       setMushafMode: (mode) => set({ mushafMode: mode }),
+      setMemoizationMode: (enabled) => set({ memoizationMode: enabled }),
+      setIsTextHidden: (hidden) => set({ isTextHidden: hidden }),
+      toggleTextVisibility: () =>
+        set((state) => ({ isTextHidden: !state.isTextHidden })),
     }),
     {
       name: "lumina-quran-settings",

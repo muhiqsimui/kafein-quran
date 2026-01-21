@@ -2,7 +2,7 @@
 
 import { useSettingsStore, MushafMode } from "@/store/useSettingsStore";
 import { useTheme } from "next-themes";
-import { Moon, Sun, Monitor, Type, Eye, Volume2, X, Book } from "lucide-react";
+import { Moon, Sun, Monitor, Type, Eye, Volume2, X, Book, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
@@ -34,6 +34,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     setShowTranslation,
     mushafMode,
     setMushafMode,
+    memoizationMode,
+    setMemoizationMode,
   } = useSettingsStore();
 
   const [qaris, setQaris] = useState<Qari[]>([]);
@@ -252,6 +254,28 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                     className={cn(
                       "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
                       showTranslation ? "translate-x-4" : "translate-x-0"
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* Mode Menghafal */}
+              <div className="flex items-center justify-between p-3 bg-background border border-border rounded-lg">
+                <div className="flex items-center gap-2">
+                  <Brain className="w-4 h-4 text-primary" />
+                  <div className="text-sm font-medium">Mode Menghafal</div>
+                </div>
+                <button
+                  onClick={() => setMemoizationMode(!memoizationMode)}
+                  className={cn(
+                    "relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    memoizationMode ? "bg-primary" : "bg-muted"
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                      memoizationMode ? "translate-x-4" : "translate-x-0"
                     )}
                   />
                 </button>
