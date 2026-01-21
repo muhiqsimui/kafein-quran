@@ -12,6 +12,7 @@ interface AudioState {
   onNavigatePrev: (() => void) | null;
   repeatMode: "off" | "one" | "all"; // off, one (repeat current ayah), all (repeat all ayahs)
   autoAdvance: boolean; // auto go to next ayah when current finishes
+  playbackRate: number;
 
   // Actions
   setAudio: (
@@ -29,6 +30,7 @@ interface AudioState {
   ) => void;
   toggleRepeat: () => void;
   setAutoAdvance: (enabled: boolean) => void;
+  setPlaybackRate: (rate: number) => void;
   play: () => void;
   pause: () => void;
   stop: () => void;
@@ -47,6 +49,7 @@ export const useAudioStore = create<AudioState>((set) => ({
   onNavigatePrev: null,
   repeatMode: "off",
   autoAdvance: false,
+  playbackRate: 1,
 
   setAudio: (surah, ayah, url, surahName, qoriName, totalVerses, autoPlay = true) =>
     set({
@@ -85,6 +88,8 @@ export const useAudioStore = create<AudioState>((set) => ({
       // If autoAdvance is turned ON, set repeatMode to off
       repeatMode: enabled ? "off" : state.repeatMode,
     })),
+
+  setPlaybackRate: (rate) => set({ playbackRate: rate }),
 
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),

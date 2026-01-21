@@ -29,6 +29,8 @@ export function AudioBar() {
     autoAdvance,
     toggleRepeat,
     setAutoAdvance,
+    playbackRate,
+    setPlaybackRate,
     togglePlay,
     stop,
     pause,
@@ -55,38 +57,45 @@ export function AudioBar() {
       howlRef.current.unload();
     }
 
-    howlRef.current = new Howl({
+    const h = new Howl({
       src: [audioUrl],
       html5: true,
-      onplay: () => {
-        setIsLoading(false);
-        play();
-      },
-      onpause: () => pause(),
-      onend: () => {
-        const {
-          repeatMode: mode,
-          autoAdvance: auto,
-          onNavigateNext: next,
-        } = stateRef.current;
+      rate: playbackRate,
+    } as any);
 
-        if (mode === "one") {
-          howlRef.current?.play();
-        } else if (mode === "all" || (mode === "off" && auto)) {
-          if (next) {
-            next();
-          } else {
-            pause(); // Logo otomatis jadi Play jika list habis
-          }
-        } else {
-          pause(); // Logo otomatis jadi Play saat audio selesai
-        }
-      },
-      onloaderror: () => {
-        setIsLoading(false);
-        pause();
-      },
+    (h as any).on("play", () => {
+      setIsLoading(false);
+      play();
     });
+
+    (h as any).on("pause", () => pause());
+
+    (h as any).on("end", () => {
+      const {
+        repeatMode: mode,
+        autoAdvance: auto,
+        onNavigateNext: next,
+      } = stateRef.current;
+
+      if (mode === "one") {
+        howlRef.current?.play();
+      } else if (mode === "all" || (mode === "off" && auto)) {
+        if (next) {
+          next();
+        } else {
+          pause(); // Logo otomatis jadi Play jika list habis
+        }
+      } else {
+        pause(); // Logo otomatis jadi Play saat audio selesai
+      }
+    });
+
+    (h as any).on("loaderror", () => {
+      setIsLoading(false);
+      pause();
+    });
+
+    howlRef.current = h;
 
     if (isPlaying) {
       howlRef.current.play();
@@ -108,6 +117,20 @@ export function AudioBar() {
       howlRef.current.pause();
     }
   }, [isPlaying]);
+
+  // Efek Sinkronisasi Playback Rate
+  useEffect(() => {
+    if (howlRef.current) {
+      (howlRef.current as any).rate(playbackRate);
+    }
+  }, [playbackRate]);
+
+  const togglePlaybackRate = () => {
+    const rates = [1, 1.25, 1.5, 2, 0.5, 0.75];
+    const currentIndex = rates.indexOf(playbackRate);
+    const nextIndex = (currentIndex + 1) % rates.length;
+    setPlaybackRate(rates[nextIndex]);
+  };
 
   if (!audioUrl) return null;
 
@@ -154,68 +177,81 @@ export function AudioBar() {
         </div>
 
         {/* Control Buttons */}
-        <div className="flex items-center justify-center gap-3 md:gap-4">
-          {/* Tombol Repeat: Off -> One (Repeat1) -> All (Repeat Active) */}
+        <div className="flex items-center justify-between gap-2 md:gap-4">
+          {/* Playback Rate Button */}
           <button
-            onClick={toggleRepeat}
-            className={cn(
-              "p-2 rounded-full transition-all",
-              repeatMode !== "off"
-                ? "bg-primary/20 text-primary"
-                : "text-muted-foreground hover:bg-accent"
-            )}
+            onClick={togglePlaybackRate}
+            className="w-10 text-[10px] font-bold h-10 rounded-full hover:bg-accent text-muted-foreground transition-all flex items-center justify-center border border-primary/10 hover:border-primary/30"
+            title="Kecepatan Putar"
           >
-            {repeatMode === "one" ? (
-              <Repeat1 className="w-5 h-5" />
-            ) : (
-              <Repeat className="w-5 h-5" />
-            )}
+            {playbackRate}x
           </button>
 
-          <button
-            onClick={() => onNavigatePrev?.()}
-            disabled={!onNavigatePrev || isLoading}
-            className="p-2 rounded-full hover:bg-accent text-muted-foreground disabled:opacity-20"
-          >
-            <SkipBack className="w-6 h-6" />
-          </button>
+          <div className="flex items-center gap-2 md:gap-4 flex-1 justify-center">
+            {/* Tombol Repeat: Off -> One (Repeat1) -> All (Repeat Active) */}
+            <button
+              onClick={toggleRepeat}
+              className={cn(
+                "p-2 rounded-full transition-all",
+                repeatMode !== "off"
+                  ? "bg-primary/20 text-primary"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
+            >
+              {repeatMode === "one" ? (
+                <Repeat1 className="w-5 h-5" />
+              ) : (
+                <Repeat className="w-5 h-5" />
+              )}
+            </button>
 
-          {/* Tombol Play/Pause - Logo Otomatis Berganti */}
-          <button
-            onClick={togglePlay}
-            disabled={isLoading}
-            className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
-          >
-            {isLoading ? (
-              <div className="w-6 h-6 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
-            ) : isPlaying ? (
-              <Pause className="w-7 h-7 fill-current" />
-            ) : (
-              <Play className="w-7 h-7 fill-current ml-1" />
-            )}
-          </button>
+            <button
+              onClick={() => onNavigatePrev?.()}
+              disabled={!onNavigatePrev || isLoading}
+              className="p-2 rounded-full hover:bg-accent text-muted-foreground disabled:opacity-20"
+            >
+              <SkipBack className="w-6 h-6" />
+            </button>
 
-          <button
-            onClick={() => onNavigateNext?.()}
-            disabled={!onNavigateNext || isLoading}
-            className="p-2 rounded-full hover:bg-accent text-muted-foreground disabled:opacity-20"
-          >
-            <SkipForward className="w-6 h-6" />
-          </button>
+            {/* Tombol Play/Pause - Logo Otomatis Berganti */}
+            <button
+              onClick={togglePlay}
+              disabled={isLoading}
+              className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
+            >
+              {isLoading ? (
+                <div className="w-6 h-6 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+              ) : isPlaying ? (
+                <Pause className="w-7 h-7 fill-current" />
+              ) : (
+                <Play className="w-7 h-7 fill-current ml-1" />
+              )}
+            </button>
 
-          {/* Tombol Auto Play */}
-          <button
-            onClick={() => setAutoAdvance(!autoAdvance)}
-            className={cn(
-              "p-2 rounded-full transition-all",
-              autoAdvance
-                ? "bg-emerald-500/20 text-emerald-600"
-                : "text-muted-foreground hover:bg-accent"
-            )}
-            title="Auto Advance"
-          >
-            <ListVideo className="w-5 h-5" />
-          </button>
+            <button
+              onClick={() => onNavigateNext?.()}
+              disabled={!onNavigateNext || isLoading}
+              className="p-2 rounded-full hover:bg-accent text-muted-foreground disabled:opacity-20"
+            >
+              <SkipForward className="w-6 h-6" />
+            </button>
+
+            {/* Tombol Auto Play */}
+            <button
+              onClick={() => setAutoAdvance(!autoAdvance)}
+              className={cn(
+                "p-2 rounded-full transition-all",
+                autoAdvance
+                  ? "bg-emerald-500/20 text-emerald-600"
+                  : "text-muted-foreground hover:bg-accent"
+              )}
+              title="Auto Advance"
+            >
+              <ListVideo className="w-5 h-5" />
+            </button>
+          </div>
+          {/* Spacer for symmetry (the speed button is on the left) */}
+          <div className="w-10 md:block hidden" />
         </div>
       </div>
     </div>
