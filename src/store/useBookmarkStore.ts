@@ -8,12 +8,14 @@ interface Bookmark {
   chapterName: string;
   textArabic?: string;
   translation?: string;
+  note?: string;
 }
 
 interface BookmarkState {
   bookmarks: Bookmark[];
   addBookmark: (bookmark: Bookmark) => void;
   removeBookmark: (ayahKey: string) => void;
+  updateBookmarkNote: (ayahKey: string, note: string) => void;
   toggleBookmark: (bookmark: Bookmark) => void;
   isBookmarked: (ayahKey: string) => boolean;
 }
@@ -29,6 +31,13 @@ export const useBookmarkStore = create<BookmarkState>()(
       },
       removeBookmark: (ayahKey) => {
         set({ bookmarks: get().bookmarks.filter((b) => b.ayahKey !== ayahKey) });
+      },
+      updateBookmarkNote: (ayahKey, note) => {
+        set({
+          bookmarks: get().bookmarks.map((b) =>
+            b.ayahKey === ayahKey ? { ...b, note } : b
+          ),
+        });
       },
       isBookmarked: (ayahKey) => {
         return get().bookmarks.some((b) => b.ayahKey === ayahKey);

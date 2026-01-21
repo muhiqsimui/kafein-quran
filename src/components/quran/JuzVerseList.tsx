@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Verse, Chapter } from "@/types";
 import { AyahItem } from "./AyahItem";
 import { TafsirSheet } from "./TafsirSheet";
+import { BookmarkNoteDialog } from "./BookmarkNoteDialog";
 import { useAudioStore } from "@/store/useAudioStore";
 import { useBookmarkStore } from "@/store/useBookmarkStore";
 import { useSettingsStore } from "@/store/useSettingsStore";
@@ -18,12 +19,13 @@ interface JuzVerseListProps {
 
 export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVerseListProps) {
   const [activeTafsir, setActiveTafsir] = useState<string | null>(null);
+  const [notingAyah, setNotingAyah] = useState<{ key: string; note?: string } | null>(null);
   const { selectedQari, setLastRead, fontFamily, mushafMode } = useSettingsStore();
   const [verses, setVerses] = useState<Verse[]>(initialVerses);
   const [loading, setLoading] = useState(false);
   const fontClass = getArabicFontClass(fontFamily);
   const { setAudio, currentAyah, setNavigationCallbacks } = useAudioStore();
-  const { addBookmark, removeBookmark, isBookmarked } = useBookmarkStore();
+  const { addBookmark, removeBookmark, isBookmarked, updateBookmarkNote, bookmarks } = useBookmarkStore();
 
   const isInitialized = useRef(false);
   const initialModeRef = useRef(mushafMode);
@@ -122,7 +124,11 @@ export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVers
         chapterName: getChapterName(chapterId),
         ayahNumber: verse.verse_number,
         ayahKey: verse.verse_key,
+        textArabic: verse.text_uthmani,
+        translation: verse.translations?.[0]?.text,
       });
+      // Suggest writing a note
+      setNotingAyah({ key: verse.verse_key });
     }
   };
 
@@ -207,6 +213,7 @@ export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVers
                     onPlay={() => handlePlay(verse)}
                     onTafsir={() => setActiveTafsir(verse.verse_key)}
                     onBookmark={() => handleBookmark(verse)}
+                    note={bookmarks.find(b => b.ayahKey === verse.verse_key)?.note}
                   />
               </div>
             </div>
@@ -225,6 +232,18 @@ export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVers
       <TafsirSheet
         ayahKey={activeTafsir}
         onClose={() => setActiveTafsir(null)}
+      />
+
+      <BookmarkNoteDialog
+        isOpen={!!notingAyah}
+        onClose={() => setNotingAyah(null)}
+        onSave={(note) => {
+          if (notingAyah) {
+            updateBookmarkNote(notingAyah.key, note);
+          }
+        }}
+        verseKey={notingAyah?.key || ""}
+        initialNote={bookmarks.find(b => b.ayahKey === notingAyah?.key)?.note}
       />
     </>
   );

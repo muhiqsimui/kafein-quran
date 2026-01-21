@@ -1,6 +1,6 @@
 import { Verse } from "@/types";
 import { cn, normalizeQuranText, getArabicFontClass } from "@/lib/utils";
-import { Play, BookOpen, Bookmark } from "lucide-react";
+import { Play, BookOpen, Bookmark, FileText } from "lucide-react";
 import { useSettingsStore } from "@/store/useSettingsStore";
 
 interface AyahItemProps {
@@ -11,6 +11,7 @@ interface AyahItemProps {
   onPlay?: () => void;
   onTafsir?: () => void;
   onBookmark?: () => void;
+  note?: string;
 }
 
 export function AyahItem({
@@ -21,6 +22,7 @@ export function AyahItem({
   onPlay,
   onTafsir,
   onBookmark,
+  note,
 }: AyahItemProps) {
   const { 
     arabicFontSize, 
@@ -112,6 +114,16 @@ export function AyahItem({
           >
             {verse.translations[0].text.replace(/<(?:.|\n)*?>/gm, "")}
           </p>
+        )}
+
+        {note && (
+          <div className="mt-4 p-4 rounded-xl bg-primary/5 border border-primary/10 flex items-start gap-3 animate-in fade-in slide-in-from-top-1 duration-500">
+            <FileText className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="text-[10px] font-bold text-primary uppercase tracking-wider">Catatan Anda</p>
+              <p className="text-sm text-foreground/80 italic">{note}</p>
+            </div>
+          </div>
         )}
       </div>
     </div>
