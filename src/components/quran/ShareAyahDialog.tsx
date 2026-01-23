@@ -1,8 +1,7 @@
-"use client";
-
-import { X, Share2, Copy, Download, MessageCircle, Instagram, Check, Link2, FileText } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { X, Share2, Copy, Download, Check, Link2, FileText, Loader2, Maximize2, Type, Languages, Palette } from "lucide-react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
+import { useAyahCanvas, ShareTheme } from "@/hooks/useAyahCanvas";
 
 interface ShareAyahDialogProps {
   isOpen: boolean;
@@ -15,6 +14,15 @@ interface ShareAyahDialogProps {
   note?: string;
 }
 
+const THEME_OPTIONS: { id: ShareTheme; label: string; colors: string[] }[] = [
+  { id: 'midnight', label: 'Midnight', colors: ['#0f172a', '#1e293b'] },
+  { id: 'emerald', label: 'Emerald', colors: ['#064e3b', '#065f46'] },
+  { id: 'sunset', label: 'Sunset', colors: ['#4c1d95', '#831843'] },
+  { id: 'ocean', label: 'Ocean', colors: ['#1e3a8a', '#1e40af'] },
+  { id: 'rose', label: 'Rose', colors: ['#881337', '#4c0519'] },
+  { id: 'minimal', label: 'Minimal', colors: ['#ffffff', '#f8fafc'] },
+];
+
 export function ShareAyahDialog({
   isOpen,
   onClose,
@@ -25,231 +33,52 @@ export function ShareAyahDialog({
   translation,
   note,
 }: ShareAyahDialogProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [includeNote, setIncludeNote] = useState(false);
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [showArabic, setShowArabic] = useState(true);
+  const [showTranslation, setShowTranslation] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState<ShareTheme>('midnight');
+  
   const [isCopied, setIsCopied] = useState(false);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isFullScreen, setIsFullScreen] = useState(false);
 
-  const generateImage = useCallback(async () => {
-    if (!textArabic || !translation) return;
-    setIsGenerating(true);
+  // Custom Hook untuk handle canvas rendering
+  const { previewUrl, isGenerating, generateImage } = useAyahCanvas();
 
-    // Ensure fonts are loaded before drawing
-    try {
-      await Promise.all([
-        document.fonts.load("bold 40px Inter"),
-        document.fonts.load("italic 32px Inter"),
-        document.fonts.load("italic 28px Inter"),
-        document.fonts.load("80px Amiri"),
-      ]);
-    } catch (e) {
-      console.warn("Fonts could not be loaded, using fallbacks", e);
-    }
-
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Set dimensions for Instagram/WhatsApp Story (9:16)
-    canvas.width = 1080;
-    canvas.height = 1920;
-
-    // Background Gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, "#0f172a"); // slate-900
-    gradient.addColorStop(1, "#1e293b"); // slate-800
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Decorative Elements (Overlays)
-    ctx.globalAlpha = 0.1;
-    ctx.fillStyle = "#10b981"; // emerald-500
-    ctx.beginPath();
-    ctx.arc(canvas.width, 0, 600, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(0, canvas.height, 400, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.globalAlpha = 1.0;
-
-    // App Branding
-    ctx.font = "bold 40px Inter, sans-serif";
-    ctx.fillStyle = "#10b981";
-    ctx.textAlign = "center";
-    ctx.fillText("Lumina Quran", canvas.width / 2, 100);
-
-    // Surah & Ayah Info
-    ctx.font = "600 36px Inter, sans-serif";
-    ctx.fillStyle = "#94a3b8";
-    ctx.fillText(`QS. ${chapterName} : ${ayahNumber}`, canvas.width / 2, 160);
-
-    // Arabic Text
-    ctx.font = "80px 'Amiri', 'Traditional Arabic', serif";
-    ctx.fillStyle = "#ffffff";
-    ctx.textAlign = "right";
-    ctx.direction = "rtl";
-    
-    const maxWidth = canvas.width - 160;
-    const arabicWords = textArabic.split(" ");
-    let line = "";
-    let lines = [];
-    let y = 500;
-
-    for (let n = 0; n < arabicWords.length; n++) {
-      let testLine = line + arabicWords[n] + " ";
-      let metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
-        lines.push(line);
-        line = arabicWords[n] + " ";
-      } else {
-        line = testLine;
-      }
-    }
-    lines.push(line);
-
-    ctx.textAlign = "center";
-    lines.forEach((l) => {
-      ctx.fillText(l, canvas.width / 2, y);
-      y += 120;
-    });
-
-    // Separator
-    y += 60;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2 - 100, y);
-    ctx.lineTo(canvas.width / 2 + 100, y);
-    ctx.strokeStyle = "rgba(16, 185, 129, 0.3)";
-    ctx.lineWidth = 4;
-    ctx.stroke();
-    y += 100;
-
-    // Translation Text
-    ctx.font = "italic 32px Inter, sans-serif";
-    ctx.fillStyle = "#cbd5e1";
-    ctx.direction = "ltr";
-    
-    const cleanTranslation = translation.replace(/<(?:.|\n)*?>/gm, "");
-    const translationWords = cleanTranslation.split(" ");
-    line = "";
-    lines = [];
-    
-    ctx.textAlign = "center";
-    for (let n = 0; n < translationWords.length; n++) {
-      let testLine = line + translationWords[n] + " ";
-      let metrics = ctx.measureText(testLine);
-      if (metrics.width > maxWidth && n > 0) {
-        lines.push(line);
-        line = translationWords[n] + " ";
-      } else {
-        line = testLine;
-      }
-    }
-    lines.push(line);
-
-    lines.forEach((l) => {
-      ctx.fillText(l, canvas.width / 2, y);
-      y += 50;
-    });
-
-    // Note Section
-    if (includeNote && note) {
-      y += 60;
-      
-      // Note Box
-      ctx.fillStyle = "rgba(16, 185, 129, 0.1)";
-      const boxPadding = 40;
-      const boxWidth = maxWidth;
-      const boxX = (canvas.width - boxWidth) / 2;
-      
-      // Determine note lines first to calculate box height
-      ctx.font = "italic 28px Inter, sans-serif";
-      const noteWords = note.split(" ");
-      let noteLine = "";
-      let noteLines = [];
-      
-      for (let n = 0; n < noteWords.length; n++) {
-        let testLine = noteLine + noteWords[n] + " ";
-        let metrics = ctx.measureText(testLine);
-        if (metrics.width > boxWidth - boxPadding * 2 && n > 0) {
-          noteLines.push(noteLine);
-          noteLine = noteWords[n] + " ";
+  // 1. Handle ESC key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (isFullScreen) {
+          setIsFullScreen(false);
         } else {
-          noteLine = testLine;
+          onClose();
         }
       }
-      noteLines.push(noteLine);
-      
-      const boxHeight = noteLines.length * 40 + boxPadding * 2 + 60;
-      
-      // Draw rounded box
-      const radius = 24;
-      ctx.beginPath();
-      ctx.moveTo(boxX + radius, y);
-      ctx.lineTo(boxX + boxWidth - radius, y);
-      ctx.quadraticCurveTo(boxX + boxWidth, y, boxX + boxWidth, y + radius);
-      ctx.lineTo(boxX + boxWidth, y + boxHeight - radius);
-      ctx.quadraticCurveTo(boxX + boxWidth, y + boxHeight, boxX + boxWidth - radius, y + boxHeight);
-      ctx.lineTo(boxX + radius, y + boxHeight);
-      ctx.quadraticCurveTo(boxX, y + boxHeight, boxX, y + boxHeight - radius);
-      ctx.lineTo(boxX, y + radius);
-      ctx.quadraticCurveTo(boxX, y, boxX + radius, y);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = "rgba(16, 185, 129, 0.2)";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // Note Title
-      ctx.font = "bold 24px Inter, sans-serif";
-      ctx.fillStyle = "#10b981";
-      ctx.textAlign = "left";
-      ctx.direction = "ltr";
-      ctx.fillText("Catatan Saya:", boxX + boxPadding, y + boxPadding + 30);
-      
-      // Note Content
-      ctx.font = "italic 28px Inter, sans-serif";
-      ctx.fillStyle = "#e2e8f0";
-      noteLines.forEach((l, i) => {
-        ctx.fillText(l, boxX + boxPadding, y + boxPadding + 70 + (i * 40));
-      });
-      
-      y += boxHeight;
-    }
-
-    // Footer
-    ctx.font = "300 24px Inter, sans-serif";
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#64748b";
-    ctx.fillText("lumina-quran.vercel.app", canvas.width / 2, canvas.height - 100);
-
-    const dataUrl = canvas.toDataURL("image/png");
-    setPreviewUrl(dataUrl);
-    setIsGenerating(false);
-  }, [includeNote, textArabic, translation, note, chapterName, ayahNumber]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const runGeneration = async () => {
-      if (isOpen && isMounted) {
-        document.body.style.overflow = "hidden";
-        await generateImage();
-      }
     };
+    if (isOpen) window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, onClose, isFullScreen]);
 
+  // 2. Trigger Generate Gambar
+  useEffect(() => {
     if (isOpen) {
-      runGeneration();
+      document.body.style.overflow = "hidden";
+      generateImage({ 
+        chapterName, 
+        ayahNumber, 
+        textArabic, 
+        translation, 
+        note, 
+        includeNote,
+        showArabic,
+        showTranslation,
+        theme: selectedTheme
+      });
     } else {
       document.body.style.overflow = "unset";
-      setPreviewUrl(null);
     }
-
-    return () => {
-      isMounted = false;
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, generateImage]);
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isOpen, includeNote, showArabic, showTranslation, selectedTheme, generateImage, chapterName, ayahNumber, textArabic, translation, note]);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/share/${ayahKey.replace(":", "-")}`;
@@ -261,12 +90,12 @@ export function ShareAyahDialog({
   const handleDownload = () => {
     if (!previewUrl) return;
     const link = document.createElement("a");
-    link.download = `lumina-quran-${ayahKey}.png`;
+    link.download = `lumina-quran-${ayahKey.replace(":", "-")}.png`;
     link.href = previewUrl;
     link.click();
   };
 
-  const handleShare = async () => {
+  const handleNativeShare = async () => {
     if (!previewUrl) return;
     try {
       const response = await fetch(previewUrl);
@@ -276,8 +105,8 @@ export function ShareAyahDialog({
       if (navigator.share) {
         await navigator.share({
           files: [file],
-          title: `Ayah ${ayahKey}`,
-          text: `Surah ${chapterName} Ayat ${ayahNumber}`,
+          title: `QS ${chapterName}:${ayahNumber}`,
+          text: `Baca ayat ini di Lumina Quran`,
         });
       } else {
         handleDownload();
@@ -292,144 +121,237 @@ export function ShareAyahDialog({
 
   return (
     <>
-      <div
-        className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] transition-opacity animate-in fade-in duration-300"
-        onClick={onClose}
-      />
+      <div 
+        role="dialog" 
+        aria-modal="true" 
+        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      >
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
+          onClick={onClose}
+        />
 
-      <div className="fixed inset-x-4 top-[10%] bottom-[10%] sm:inset-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-[800px] sm:h-[600px] bg-card border border-border rounded-3xl shadow-2xl z-[110] flex flex-col sm:flex-row overflow-hidden animate-in zoom-in-95 duration-300">
-        {/* Preview Area */}
-        <div className="flex-1 bg-muted/50 p-6 flex flex-col items-center justify-center relative min-h-[300px] sm:min-h-0">
-          <div className="absolute top-4 left-4 z-10">
-            <span className="px-3 py-1 bg-background/50 backdrop-blur-md border border-border rounded-full text-[10px] font-bold uppercase tracking-wider">
-              Preview Story
-            </span>
-          </div>
+        <div className="relative w-full max-w-5xl h-[calc(100dvh-2rem)] sm:h-[650px] bg-card border border-border rounded-3xl shadow-2xl z-[110] flex flex-col sm:flex-row overflow-hidden animate-in zoom-in-95 duration-300">
           
-          {isGenerating ? (
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-              <p className="text-sm font-medium text-muted-foreground">Menyiapkan Gambar...</p>
-            </div>
-          ) : previewUrl ? (
-            <div className="relative h-full aspect-[9/16] shadow-2xl rounded-lg overflow-hidden border border-border/50">
-              <img src={previewUrl} alt="Ayah Preview" className="h-full object-contain" />
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">Gagal memuat preview</p>
-          )}
-        </div>
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 z-20 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full sm:hidden transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
 
-        {/* Content & Actions */}
-        <div className="w-full sm:w-[320px] bg-card border-l border-border p-6 flex flex-col">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Share2 className="w-5 h-5 text-primary" />
+          {/* --- 1. PREVIEW SECTION --- */}
+          <div className="flex-1 bg-muted/30 p-6 flex flex-col items-center justify-center relative min-h-[40%] sm:min-h-full overflow-hidden border-b sm:border-b-0 sm:border-r border-border">
+            <div className="absolute top-6 left-6 z-10 hidden sm:block">
+              <span className="px-3 py-1 bg-background/80 backdrop-blur border border-border rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                Preview Story
+              </span>
+            </div>
+            
+            {isGenerating ? (
+              <div className="flex flex-col items-center gap-4 animate-pulse text-center">
+                <Loader2 className="w-10 h-10 text-primary animate-spin" />
+                <p className="text-sm font-medium text-muted-foreground">Meracik Gambar...</p>
               </div>
-              <h2 className="text-xl font-bold">Bagikan</h2>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-accent rounded-xl transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="space-y-6 flex-1">
-            {note && (
-              <div className="space-y-4">
-                <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Pilihan Konten</p>
-                <button
-                  onClick={() => setIncludeNote(!includeNote)}
-                  className={cn(
-                    "w-full p-4 rounded-2xl border transition-all flex items-center justify-between group",
-                    includeNote 
-                      ? "bg-primary/5 border-primary/50" 
-                      : "bg-secondary border-border hover:border-primary/30"
-                  )}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={cn(
-                      "w-5 h-5 rounded-md border flex items-center justify-center transition-colors",
-                      includeNote ? "bg-primary border-primary" : "border-muted-foreground"
-                    )}>
-                      {includeNote && <Check className="w-3.5 h-3.5 text-white" />}
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold">Sertakan Catatan</p>
-                      <p className="text-[10px] text-muted-foreground truncate max-w-[180px]">
-                        {note}
-                      </p>
+            ) : previewUrl ? (
+              <div 
+                className="relative h-full w-full flex items-center justify-center group cursor-zoom-in"
+                onClick={() => setIsFullScreen(true)}
+              >
+                  <img 
+                    src={previewUrl} 
+                    alt="Ayah Preview" 
+                    className="max-h-full max-w-full object-contain rounded-lg shadow-2xl border border-border/50 transition-all duration-300" 
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-lg pointer-events-none">
+                    <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-medium">
+                      <Maximize2 className="w-3 h-3" />
+                      Perbesar
                     </div>
                   </div>
-                  <FileText className={cn(
-                    "w-4 h-4 transition-colors",
-                    includeNote ? "text-primary" : "text-muted-foreground"
-                  )} />
-                </button>
               </div>
+            ) : (
+              <p className="text-sm text-muted-foreground text-center">Gagal memuat preview</p>
             )}
+          </div>
 
-            <div className="space-y-4">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Link Akses</p>
-              <button
-                onClick={handleCopyLink}
-                className="w-full p-4 rounded-2xl bg-secondary hover:bg-secondary/80 border border-border transition-all flex items-center justify-between group active:scale-[0.98]"
-              >
-                <div className="flex items-center gap-3 overflow-hidden">
-                  <Link2 className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-sm truncate font-medium">
-                    {ayahKey ? `lumina/share/${ayahKey}` : 'Salin Link'}
-                  </span>
+          {/* --- 2. CONTROLS SECTION --- */}
+          <div className="w-full sm:w-[400px] bg-card flex flex-col h-full overflow-hidden">
+            <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <Share2 className="w-5 h-5 text-primary" />
                 </div>
-                {isCopied ? (
-                  <Check className="w-4 h-4 text-emerald-500" />
-                ) : (
-                  <Copy className="w-4 h-4 text-muted-foreground group-hover:text-primary" />
-                )}
+                <h2 className="text-lg font-bold">Bagikan Ayat</h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="hidden sm:flex p-2 hover:bg-accent rounded-xl transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4">
-              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Kirim ke Sosial Media</p>
+            <div className="flex-1 overflow-y-auto p-6 space-y-8">
               
-              <div className="grid grid-cols-1 gap-3">
-                <button
-                  onClick={handleShare}
-                  className="w-full py-4 px-6 rounded-2xl bg-[#E1306C] text-white hover:opacity-90 transition-all flex items-center gap-3 font-semibold text-sm active:scale-[0.98]"
-                >
-                  <Instagram className="w-5 h-5" />
-                  Instagram Story
-                </button>
-                
-                <button
-                  onClick={handleShare}
-                  className="w-full py-4 px-6 rounded-2xl bg-[#25D366] text-white hover:opacity-90 transition-all flex items-center gap-3 font-semibold text-sm active:scale-[0.98]"
-                >
-                  <MessageCircle className="w-5 h-5" />
-                  WhatsApp Status
-                </button>
+              {/* Theme Selector */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Tema Latar</p>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {THEME_OPTIONS.map((theme) => (
+                    <button
+                      key={theme.id}
+                      onClick={() => setSelectedTheme(theme.id)}
+                      className={cn(
+                        "relative flex flex-col items-center gap-2 p-2 rounded-xl border transition-all",
+                        selectedTheme === theme.id 
+                          ? "border-primary bg-primary/5 ring-1 ring-primary" 
+                          : "border-border hover:border-primary/50"
+                      )}
+                    >
+                      <div 
+                        className="w-full h-12 rounded-lg"
+                        style={{ 
+                          background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`,
+                          border: theme.id === 'minimal' ? '1px solid #e2e8f0' : 'none'
+                        }}
+                      />
+                      <span className="text-[10px] font-bold">{theme.label}</span>
+                      {selectedTheme === theme.id && (
+                        <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                          <Check className="w-2.5 h-2.5 text-white" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                <button
-                  onClick={handleDownload}
-                  className="w-full py-4 px-6 rounded-2xl border border-border hover:bg-accent transition-all flex items-center gap-3 font-semibold text-sm active:scale-[0.98]"
-                >
-                  <Download className="w-5 h-5" />
-                  Simpan Gambar
-                </button>
+              {/* Visibility Controls */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Type className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Tampilan</p>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                   <button
+                    onClick={() => setShowArabic(!showArabic)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl border transition-all",
+                      showArabic ? "bg-primary/5 border-primary" : "bg-muted/50 border-border opacity-60"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                      showArabic ? "bg-primary border-primary" : "border-muted-foreground"
+                    )}>
+                      {showArabic && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-xs font-semibold">Teks Arab</span>
+                  </button>
+
+                  <button
+                    onClick={() => setShowTranslation(!showTranslation)}
+                    className={cn(
+                      "flex items-center gap-3 p-3 rounded-xl border transition-all",
+                      showTranslation ? "bg-primary/5 border-primary" : "bg-muted/50 border-border opacity-60"
+                    )}
+                  >
+                    <div className={cn(
+                      "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                      showTranslation ? "bg-primary border-primary" : "border-muted-foreground"
+                    )}>
+                      {showTranslation && <Check className="w-3 h-3 text-white" />}
+                    </div>
+                    <span className="text-xs font-semibold">Terjemahan</span>
+                  </button>
+                </div>
+
+                {note && (
+                  <button
+                    onClick={() => setIncludeNote(!includeNote)}
+                    className={cn(
+                      "w-full flex items-center justify-between p-3 rounded-xl border transition-all",
+                      includeNote ? "bg-primary/5 border-primary" : "bg-muted/50 border-border opacity-60"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={cn(
+                        "w-4 h-4 rounded border flex items-center justify-center transition-colors",
+                        includeNote ? "bg-primary border-primary" : "border-muted-foreground"
+                      )}>
+                        {includeNote && <Check className="w-3 h-3 text-white" />}
+                      </div>
+                      <span className="text-xs font-semibold text-left">Sertakan Catatan</span>
+                    </div>
+                    <FileText className={cn("w-4 h-4", includeNote ? "text-primary" : "text-muted-foreground")} />
+                  </button>
+                )}
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-3 pt-2">
+                  <button
+                    onClick={handleNativeShare}
+                    className="w-full py-4 px-6 rounded-2xl bg-primary text-primary-foreground hover:opacity-90 transition-all flex items-center justify-center gap-3 font-bold shadow-lg shadow-primary/20 active:scale-[0.98]"
+                  >
+                    <Share2 className="w-5 h-5" />
+                    Bagikan (IG/WA)
+                  </button>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={handleDownload}
+                      className="py-3 px-4 rounded-xl border border-border hover:bg-accent transition-all flex items-center justify-center gap-2 font-semibold text-xs"
+                    >
+                      <Download className="w-4 h-4" />
+                      Simpan
+                    </button>
+                    <button
+                      onClick={handleCopyLink}
+                      className="py-3 px-4 rounded-xl border border-border hover:bg-accent transition-all flex items-center justify-center gap-2 font-semibold text-xs overflow-hidden"
+                    >
+                      {isCopied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
+                      <span className="truncate">{isCopied ? 'Tersalin' : 'Link'}</span>
+                    </button>
+                  </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-6 mt-auto">
-            <p className="text-[10px] text-center text-muted-foreground leading-relaxed">
-              * Pada perangkat desktop, gunakan tombol Simpan Gambar lalu upload secara manual ke sosial media Anda.
-            </p>
+            <div className="p-4 bg-muted/30 border-t border-border mt-auto shrink-0">
+               <p className="text-[10px] text-center text-muted-foreground leading-relaxed">
+                 Tip: Pilih tema dan kustomisasi sebelum membagikan ke media sosial.
+               </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* --- 3. FULL SCREEN OVERLAY --- */}
+      {isFullScreen && previewUrl && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-md flex items-center justify-center p-4"
+          onClick={() => setIsFullScreen(false)}
+        >
+          <button
+            onClick={() => setIsFullScreen(false)}
+            className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 text-white rounded-full transition-colors z-[210]"
+          >
+            <X className="w-8 h-8" />
+          </button>
+
+          <img 
+            src={previewUrl} 
+            alt="Full Preview" 
+            className="max-w-full max-h-[90vh] object-contain shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
     </>
   );
 }
