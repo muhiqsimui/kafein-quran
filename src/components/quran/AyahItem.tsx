@@ -12,6 +12,7 @@ interface AyahItemProps {
   onTafsir?: () => void;
   onBookmark?: () => void;
   note?: string;
+  hasMounted?: boolean;
 }
 
 export function AyahItem({
@@ -23,6 +24,7 @@ export function AyahItem({
   onTafsir,
   onBookmark,
   note,
+  hasMounted,
 }: AyahItemProps) {
   const { 
     arabicFontSize, 
@@ -88,11 +90,11 @@ export function AyahItem({
             className={cn(
               fontClass,
               "leading-[2.5] md:leading-[3.0] text-foreground tracking-normal text-right antialiased py-6 transition-all duration-500",
-              isTextHidden && "blur-md opacity-20 select-none pointer-events-none"
+              hasMounted && isTextHidden && "blur-md opacity-20 select-none pointer-events-none"
             )}
             dir="rtl"
             style={{ 
-              fontSize: `${arabicFontSize}px`,
+              fontSize: `${hasMounted ? arabicFontSize : 32}px`,
               fontFeatureSettings: '"rlig" 1, "calt" 1, "liga" 1',
               textRendering: 'optimizeLegibility'
             }}
@@ -104,13 +106,13 @@ export function AyahItem({
 
       <div className="space-y-4 pt-4">
 
-        {showTranslation && verse.translations && verse.translations.length > 0 && (
+        {(!hasMounted || showTranslation) && verse.translations && verse.translations.length > 0 && (
           <p
             className={cn(
               "text-muted-foreground leading-relaxed transition-all duration-500",
-              isTextHidden && "blur-sm opacity-10 select-none pointer-events-none"
+              hasMounted && isTextHidden && "blur-sm opacity-10 select-none pointer-events-none"
             )}
-            style={{ fontSize: `${translationFontSize}px` }}
+            style={{ fontSize: `${hasMounted ? translationFontSize : 16}px` }}
           >
             {verse.translations[0].text.replace(/<(?:.|\n)*?>/gm, "")}
           </p>

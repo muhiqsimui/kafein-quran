@@ -31,11 +31,14 @@ export function VerseList({
   const { lastRead, setLastRead, selectedQari, mushafMode } = useSettingsStore();
   const [verses, setVerses] = useState<Verse[]>(initialVerses);
   const [loading, setLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   
   // Initialize lastReadAyah from store if we're in the same chapter
-  const [lastReadAyah, setLastReadAyah] = useState<number>(() => {
-    return 1;
-  });
+  const [lastReadAyah, setLastReadAyah] = useState<number>(1);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const { setAudio, currentAyah, setNavigationCallbacks } = useAudioStore();
   const { addBookmark, removeBookmark, isBookmarked, updateBookmarkNote, bookmarks } = useBookmarkStore();
@@ -208,13 +211,14 @@ export function VerseList({
           <AyahItem
             key={`${mushafMode}-${verse.id}`}
             verse={verse}
-            isActive={currentAyah === verse.verse_number}
+            isActive={hasMounted && currentAyah === verse.verse_number}
             isHighlighted={highlightAyah === verse.verse_number}
-            isBookmarked={isBookmarked(verse.verse_key)}
+            isBookmarked={hasMounted && isBookmarked(verse.verse_key)}
             onPlay={() => handlePlay(verse)}
             onTafsir={() => setActiveTafsir(verse.verse_key)}
             onBookmark={() => handleBookmark(verse)}
-            note={bookmarks.find(b => b.ayahKey === verse.verse_key)?.note}
+            note={hasMounted ? bookmarks.find(b => b.ayahKey === verse.verse_key)?.note : undefined}
+            hasMounted={hasMounted}
           />
         ))}
       </div>

@@ -4,11 +4,14 @@ import { useBookmarkStore } from '@/store/useBookmarkStore';
 import { Bookmark as BookmarkIcon, Trash2, ChevronRight, FileText, PlusCircle } from 'lucide-react';
 import Link from 'next/link';
 import { BookmarkNoteDialog } from '@/components/quran/BookmarkNoteDialog';
+import { ShareAyahDialog } from '@/components/quran/ShareAyahDialog';
 import { useState } from 'react';
+import { Share2 } from 'lucide-react';
 
 export default function BookmarksPage() {
   const { bookmarks, removeBookmark, updateBookmarkNote } = useBookmarkStore();
   const [notingAyah, setNotingAyah] = useState<{ key: string; note?: string } | null>(null);
+  const [sharingBookmark, setSharingBookmark] = useState<typeof bookmarks[0] | null>(null);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -87,12 +90,19 @@ export default function BookmarksPage() {
                     <FileText className="w-4 h-4" />
                   </button>
                 )}
-                <button
+                 <button
                   onClick={() => removeBookmark(bookmark.ayahKey)}
                   className="p-2 rounded-md text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                   title="Hapus"
                 >
                   <Trash2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => setSharingBookmark(bookmark)}
+                  className="p-2 rounded-md text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                  title="Bagikan"
+                >
+                  <Share2 className="w-4 h-4" />
                 </button>
                 <Link
                    href={`/${bookmark.chapterId}#ayah-${bookmark.ayahNumber}`}
@@ -117,6 +127,18 @@ export default function BookmarksPage() {
         verseKey={notingAyah?.key || ""}
         initialNote={bookmarks.find(b => b.ayahKey === notingAyah?.key)?.note}
       />
+
+      {sharingBookmark && (
+        <ShareAyahDialog
+          isOpen={!!sharingBookmark}
+          onClose={() => setSharingBookmark(null)}
+          chapterName={sharingBookmark.chapterName}
+          ayahNumber={sharingBookmark.ayahNumber}
+          ayahKey={sharingBookmark.ayahKey}
+          textArabic={sharingBookmark.textArabic}
+          translation={sharingBookmark.translation}
+        />
+      )}
     </div>
   );
 }

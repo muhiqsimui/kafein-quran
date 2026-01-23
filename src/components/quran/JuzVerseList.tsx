@@ -23,7 +23,12 @@ export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVers
   const { selectedQari, setLastRead, fontFamily, mushafMode } = useSettingsStore();
   const [verses, setVerses] = useState<Verse[]>(initialVerses);
   const [loading, setLoading] = useState(false);
+  const [hasMounted, setHasMounted] = useState(false);
   const fontClass = getArabicFontClass(fontFamily);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
   const { setAudio, currentAyah, setNavigationCallbacks } = useAudioStore();
   const { addBookmark, removeBookmark, isBookmarked, updateBookmarkNote, bookmarks } = useBookmarkStore();
 
@@ -206,14 +211,16 @@ export function JuzVerseList({ verses: initialVerses, chapters, juzId }: JuzVers
                   <AyahItem
                     verse={verse}
                     isActive={
-                        useAudioStore.getState().currentSurah === chapterId && 
-                        useAudioStore.getState().currentAyah === verse.verse_number
+                        hasMounted &&
+                        currentAyah === verse.verse_number &&
+                        useAudioStore.getState().currentSurah === chapterId
                     }
-                    isBookmarked={isBookmarked(verse.verse_key)}
+                    isBookmarked={hasMounted && isBookmarked(verse.verse_key)}
                     onPlay={() => handlePlay(verse)}
                     onTafsir={() => setActiveTafsir(verse.verse_key)}
                     onBookmark={() => handleBookmark(verse)}
-                    note={bookmarks.find(b => b.ayahKey === verse.verse_key)?.note}
+                    note={hasMounted ? bookmarks.find(b => b.ayahKey === verse.verse_key)?.note : undefined}
+                    hasMounted={hasMounted}
                   />
               </div>
             </div>

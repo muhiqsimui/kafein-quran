@@ -237,3 +237,16 @@ export async function getTafsir(ayahKey: string): Promise<TafsirResponse> {
   }
 }
 
+export async function getVerseByKey(ayahKey: string): Promise<Verse | null> {
+  try {
+    const [chapterId, verseNumber] = ayahKey.split(":");
+    const data = await getVerses(parseInt(chapterId));
+    return (
+      data.verses.find((v) => v.verse_number === parseInt(verseNumber)) || null
+    );
+  } catch (error) {
+    console.error("Failed to fetch verse by key", error);
+    return null;
+  }
+}
+
