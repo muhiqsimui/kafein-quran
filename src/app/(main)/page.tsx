@@ -12,6 +12,7 @@ import {
   CircleDot,
   Clock,
   ChevronLeft,
+  Wallet,
 } from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
@@ -39,6 +40,14 @@ const mainMenuItems = [
     icon: Clock,
     href: "/prayer-times",
     color: "bg-rose-500/10 text-rose-600",
+  },
+  {
+    id: "zakat",
+    title: "Hitung Zakat",
+    description: "Hitung berbagai jenis zakat dengan mudah",
+    icon: Wallet,
+    href: "/zakat",
+    color: "bg-blue-500/10 text-blue-600",
   },
 ];
 
