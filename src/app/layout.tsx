@@ -5,6 +5,8 @@ import { Providers } from "@/components/Providers";
 import { AudioBar } from "@/components/player/AudioBar";
 import { MemoizationToggle } from "@/components/quran/MemoizationToggle";
 
+import NextTopLoader from "nextjs-toploader";
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -24,6 +26,11 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased`}>
+        <NextTopLoader 
+          color="#10b981"
+          showSpinner={false}
+          shadow="0 0 10px #10b981,0 0 5px #10b981"
+        />
         <Providers>
           {children}
           <AudioBar />

@@ -6,41 +6,46 @@ Kafein Quran adalah aplikasi web Al-Quran modern dengan estetika premium yang di
 
 ## ✨ Fitur Utama
 
-- **Mode Menghafal (Memorization Mode)** (Baru!):
-  - Sembunyikan/tampilkan teks ayat secara instan untuk melatih hafalan.
-  - Dilengkapi dengan *floating toggle* untuk akses cepat saat membaca.
-- **Berbagi Ayat (Share Ayah)** (Baru!):
-  - Bagikan cuplikan ayat favorit dengan desain premium ke media sosial.
-  - Mendukung tautan langsung ke ayat spesifik dengan tampilan yang dioptimalkan.
-- **Navigasi Juz & Ayat yang Cepat** (Baru!):
-  - Pindah antar Juz atau lompat ke ayat tertentu secara instan tanpa memuat ulang halaman.
-- **Opsi Versi Mushaf**:
-  - 🇮🇩 **Versi Kemenag RI**: Menggunakan teks Al-Quran standar Indonesia (Kemenag) yang familiar bagi pengguna di Indonesia (Default).
-  - 🇸🇦 **Versi Uthmani (Madinah)**: Teks Al-Quran gaya Madinah (Rasm Utsmani) untuk pembaca internasional.
+### 🕌 Ibadah & Zakat
+- **Kalkulator Zakat Komprehensif** (Baru!):
+  - Hitung berbagai jenis zakat: **Zakat Maal, Fitrah, Penghasilan, Emas/Perak, Perdagangan, dan Pertanian**.
+  - Dilengkapi fitur **Harga Pasar Terkini** yang dapat dikonfigurasi secara manual untuk akurasi perhitungan.
+  - Opsi komoditas lengkap untuk Zakat Fitrah dan Pertanian serta perhitungan nisab otomatis.
 - **Jadwal Shalat Global**:
   - Waktu sholat akurat mencakup seluruh dunia menggunakan koordinat GPS atau deteksi IP.
   - Pencarian kota internasional terintegrasi dengan data **Nominatim (OpenStreetMap)**.
-  - Hitung mundur ke waktu sholat berikutnya dengan penyesuaian zona waktu otomatis.
+  - Hitung mundur ke waktu shalat berikutnya dengan penyesuaian zona waktu otomatis.
 - **Dzikir & Tasbih Digital**:
   - Penghitung dzikir interaktif dengan desain minimalis.
-  - Mode getar (vibrate) dan siklus target untuk membantu khusyuk berdzikir.
-- **Pilihan Font Arab Premium**:
-  - **LPMQ Isep Misbah** (Standar Kemenag RI).
-  - **Amiri** (Naskh Style).
-  - **Uthmanic Hafs** & **Uthman Taha Naskh**.
+
+### 📖 Membaca Al-Quran
+- **Opsi Versi Mushaf**:
+  - 🇮🇩 **Versi Kemenag RI**: Menggunakan teks Al-Quran standar Indonesia (Kemenag).
+  - 🇸🇦 **Versi Uthmani (Madinah)**: Teks Al-Quran gaya Madinah (Rasm Utsmani).
 - **Audio Murattal Interaktif**:
   - Pilihan Qari ternama: **Mishary Rashid al-Afasy**, **Ali Hudhaify**, **Mahmoud al-Husary**.
   - Kontrol audio yang lancar dengan fitur **Auto-play** dan **Repeat Mode**.
-- **Mode Navigasi Lengkap**:
-  - **Menu "Baca Al-Quran"** yang terkonsolidasi untuk akses cepat:
-    - Baca per **Surah**, per **Ayat**, per **Juz**, dan per **Halaman** (Mushaf view).
-- **Fitur Pendukung**:
-  - **Tafsir Kemenag RI** terintegrasi untuk setiap ayat.
-  - **Pencarian Canggih** berdasarkan arti (Terjemahan) maupun teks Arab.
-  - **Bookmark dengan Catatan**: Simpan ayat favorit dan tambahkan pengingat atau catatan pribadi.
-  - **Last Read**: Otomatis ingat lokasi terakhir dibaca untuk setiap mode (Surah/Juz/Page).
-  - **Ukuran Font Adaptif**: Atur ukuran font Arab dan terjemahan sesuai kenyamanan mata.
-  - **Tema Dinamis**: Dukungan Dark Mode, Light Mode, dan Sinkronisasi Sistem.
+- **Mode Menghafal (Memorization Mode)**:
+  - Sembunyikan/tampilkan teks ayat secara instan untuk melatih hafalan.
+  - Dilengkapi dengan *floating toggle* untuk akses cepat saat membaca.
+- **Navigasi Juz & Ayat yang Cepat**:
+  - Pindah antar Juz atau lompat ke ayat tertentu secara instan tanpa memuat ulang halaman.
+- **Pilihan Font Arab Premium**:
+  - **LPMQ Isep Misbah** (Kemenag), **Amiri**, **Uthmanic Hafs**, & **Uthman Taha Naskh**.
+
+### 🔍 Fitur Cerdas & UX
+- **Pencarian Canggih & Super Cepat** (Ditingkatkan):
+  - Algoritma pencarian lokal yang dioptimalkan dengan *in-memory caching*.
+  - Mendukung pencarian multi-kata (*intersection search*) dan penghapusan diakritik Arab (*diacritic removal*).
+  - Fitur *highlighting* pada kata kunci dan *infinite scroll* pada hasil pencarian.
+- **Berbagi Ayat (Share Ayah)**:
+  - Bagikan cuplikan ayat favorit dengan desain premium.
+  - **Kustomisasi Tampilan**: Pilih untuk menampilkan atau menyembunyikan Terjemahan, Tafsir, dan Catatan pada gambar pratinjau.
+- **Pengalaman Pengguna (UX) Premium**:
+  - **Animasi Loading modern** untuk transisi antar halaman yang halus.
+  - **Ukuran Font Adaptif** dan **Tema Dinamis** (Dark/Light Mode).
+  - Otomatis mengingat lokasi terakhir dibaca (**Last Read**).
+  - **Tafsir Kemenag RI** terintegrasi dan **Bookmark dengan Catatan**.
 
 ---
 
