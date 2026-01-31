@@ -24,8 +24,8 @@ type ZakatType = "penghasilan" | "maal" | "fitrah" | "perdagangan" | "emas" | "p
 
 export default function ZakatPage() {
   const [activeType, setActiveType] = useState<ZakatType>("maal");
-  const [goldPrice, setGoldPrice] = useState<number>(1500000);
-  const [ricePrice, setRicePrice] = useState<number>(15000);
+  const [goldPrice, setGoldPrice] = useState<number>(1382500);
+  const [ricePrice, setRicePrice] = useState<number>(16300);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -184,46 +184,95 @@ export default function ZakatPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <Link 
-            href="/" 
-            className="p-2 hover:bg-accent rounded-full transition-colors"
-          >
-            <ChevronLeft className="w-6 h-6" />
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight">Kalkulator Zakat</h1>
-            <p className="text-sm text-muted-foreground">Hitung kewajiban zakat Anda dengan mudah</p>
-          </div>
-        </div>
-        <button 
-          onClick={() => setIsModalOpen(true)}
-          className="p-3 bg-primary/10 text-primary rounded-2xl font-bold text-xs flex items-center gap-2 hover:bg-primary/20 transition-all active:scale-95"
-        >
-          <Info className="w-4 h-4" />
-          Syarat Zakat
-        </button>
-      </div>
+{/* Header */}
+<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+  {/* Left section */}
+  <div className="flex items-center gap-3">
+    <Link
+      href="/"
+      aria-label="Kembali"
+      className="p-2 rounded-full hover:bg-accent transition-colors"
+    >
+      <ChevronLeft className="w-5 h-5" />
+    </Link>
 
-      {/* Settings Summary */}
-      <div className="grid grid-cols-2 gap-3 p-4 bg-primary/5 rounded-2xl border border-primary/10">
-        <div>
-          <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Harga Emas (per gram)</p>
-          <div className="flex items-center gap-2">
-            <span className="font-bold">{formatCurrency(goldPrice).replace(",00", "")}</span>
+    <div className="leading-tight">
+      <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
+        Kalkulator Zakat
+      </h1>
+      <p className="text-sm text-muted-foreground">
+        Hitung kewajiban zakat Anda dengan mudah
+      </p>
+    </div>
+  </div>
+
+  {/* Right section */}
+  <button
+    onClick={() => setIsModalOpen(true)}
+    className="inline-flex items-center justify-center gap-2
+               rounded-xl border border-primary/20
+               px-4 py-2 text-xs font-semibold text-primary
+               hover:bg-primary/10 transition-all active:scale-95"
+  >
+    <Info className="w-4 h-4" />
+    Syarat Zakat
+  </button>
+</div>
+
+
+      {/* Market Prices Configuration */}
+      <div className="bg-card p-6 rounded-3xl border border-border space-y-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <h3 className="font-bold flex items-center gap-2">
+            <RefreshCcw className="w-4 h-4 text-primary" />
+            Harga Pasar Terkini
+          </h3>
+          <span className="text-[10px] text-muted-foreground bg-accent px-2 py-1 rounded-full">Konfigurasi Manual</span>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga Emas / Gram</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">Rp</span>
+              <input 
+                type="text" 
+                value={formatWithDots(goldPrice)} 
+                onChange={(e) => setGoldPrice(parseDots(e.target.value))}
+                className="w-full pl-10 p-3 rounded-xl bg-accent/30 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga Beras / Kg</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">Rp</span>
+              <input 
+                type="text" 
+                value={formatWithDots(ricePrice)} 
+                onChange={(e) => setRicePrice(parseDots(e.target.value))}
+                className="w-full pl-10 p-3 rounded-xl bg-accent/30 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
+              />
+            </div>
           </div>
         </div>
-        <div>
-          <p className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Harga Beras (per kg)</p>
-          <div className="flex items-center gap-2">
-            <span className="font-bold">{formatCurrency(ricePrice).replace(",00", "")}</span>
-          </div>
-        </div>
+<div className="rounded-xl border border-primary/20 bg-primary/5 p-3">
+  <p className="flex items-start gap-2 text-xs leading-relaxed text-foreground/80">
+    <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+    <span>
+      Sesuaikan harga emas dengan harga emas hari ini di daerah Anda untuk
+      akurasi perhitungan nisab yang lebih tepat.  
+      Untuk harga beras, sesuaikan dengan harga beras yang Anda konsumsi
+      sehari-hari.
+    </span>
+  </p>
+</div>
+
       </div>
 
       {/* Type Selector */}
+      <h2 className="text-lg font-bold text-center" >Pilih Zakat</h2>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
+        
         {visibleMenuItems.map((item) => (
           <button
             key={item.id}
@@ -289,12 +338,17 @@ export default function ZakatPage() {
         <div className="space-y-4 bg-card p-6 rounded-2xl border border-border">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <Calculator className="w-5 h-5 text-primary" />
-            Detail {menuItems.find(m => m.id === activeType)?.title}
+            Zakat {menuItems.find(m => m.id === activeType)?.title}
           </h2>
           
           <div className="space-y-4">
             {activeType === "penghasilan" && (
               <>
+              <p className="text-xs leading-relaxed text-muted-foreground">Note: Sebagian ulama berpendapat penghasilan yg kena zakat apabila penghasilan tersebut telah mengendap selama satu tahun</p>
+              <p className="text-xs leading-relaxed text-muted-foreground">
+“Tidak ada zakat pada harta hingga berlalu satu tahun.”
+(HR. Abu Dawud)
+                </p>  
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Pendapatan Bulanan (Gaji, dsb)</label>
                   <div className="relative">
@@ -553,8 +607,68 @@ export default function ZakatPage() {
               </p>
             )}
           </div>
+{/* Catatan Fiqh */}
+<div className="p-4 rounded-xl border bg-muted/50 space-y-2">
+  <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+    <Info className="w-4 h-4 text-muted-foreground" />
+    Catatan Fiqh
+  </h4>
 
-          <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 space-y-3">
+  {activeType === "penghasilan" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat penghasilan dihitung dari pendapatan bersih bulanan. Nisab setara nilai
+      85 gram emas per tahun (dibagi 12). Kadar zakat
+      <span className="font-medium text-foreground"> 2,5%</span>.
+    </p>
+  )}
+
+  {activeType === "maal" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat mal mencakup <span className="font-medium text-foreground">tabungan, deposito, atau surat berharga</span> yang mengendap
+      <span className="font-medium text-foreground"> selama 1 tahun (haul)</span> dan mencapai nisab
+      <span className="font-medium text-foreground"> 85 gram emas</span>.
+    </p>
+  )}
+
+  {activeType === "fitrah" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat fitrah wajib bagi setiap jiwa Muslim dan ditunaikan sebelum shalat
+      Idul Fitri. Standarnya
+      <span className="font-medium text-foreground"> 2,5 kg beras </span>
+      atau nilai setara.
+    </p>
+  )}
+
+  {activeType === "perdagangan" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat perdagangan dihitung dari (Modal + Barang + Piutang) dikurangi
+      hutang jatuh tempo. Nisab setara
+      <span className="font-medium text-foreground"> 85 gram emas</span>
+      , kadar zakat
+      <span className="font-medium text-foreground"> 2,5%</span>.
+    </p>
+  )}
+
+  {activeType === "emas" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat emas wajib jika kepemilikan mencapai
+      <span className="font-medium text-foreground"> emas ≥ 85 gram </span>
+      dan 
+      <span className="font-medium text-foreground"> perak ≥ 595 gram</span>.
+      Kadar zakat 2,5% dari nilai kepemilikan.
+    </p>
+  )}
+
+  {activeType === "pertanian" && (
+    <p className="text-xs leading-relaxed text-muted-foreground">
+      Zakat pertanian dikeluarkan setiap panen apabila hasil mencapai nisab
+      <span className="font-medium text-foreground"> 653 kg gabah</span>,
+      tanpa syarat haul (1 tahun).
+    </p>
+  )}
+</div>
+
+          {/* <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 space-y-3">
             <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
               <Info className="w-4 h-4" />
               Catatan Fiqh
@@ -567,52 +681,13 @@ export default function ZakatPage() {
               {activeType === "emas" && <p>Wajib zakat emas jika ≥ 85g, perak ≥ 595g. Dihitung dari nilai emas yang dimiliki dikali 2.5%.</p>}
               {activeType === "pertanian" && <p>Zakat hasil bumi dikeluarkan setiap panen jika mencapai nisab 653kg gabah. Tanpa perlu haul (1 tahun).</p>}
             </div>
-          </div>
+          </div> */}
+{/* Penutup Catatan */}
+
         </div>
       </div>
 
-      {/* Market Prices Configuration */}
-      <div className="bg-card p-6 rounded-3xl border border-border space-y-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h3 className="font-bold flex items-center gap-2">
-            <RefreshCcw className="w-4 h-4 text-primary" />
-            Harga Pasar Terkini
-          </h3>
-          <span className="text-[10px] text-muted-foreground bg-accent px-2 py-1 rounded-full">Konfigurasi Manual</span>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga Emas / Gram</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">Rp</span>
-              <input 
-                type="text" 
-                value={formatWithDots(goldPrice)} 
-                onChange={(e) => setGoldPrice(parseDots(e.target.value))}
-                className="w-full pl-10 p-3 rounded-xl bg-accent/30 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
-              />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga Beras / Kg</label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">Rp</span>
-              <input 
-                type="text" 
-                value={formatWithDots(ricePrice)} 
-                onChange={(e) => setRicePrice(parseDots(e.target.value))}
-                className="w-full pl-10 p-3 rounded-xl bg-accent/30 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="p-3 bg-blue-500/5 border border-blue-500/10 rounded-xl">
-           <p className="text-[10px] text-blue-600 dark:text-blue-400 italic flex items-start gap-2">
-            <Info className="w-3 h-3 shrink-0 mt-0.5" />
-            Sesuaikan harga di atas dengan harga pasar daerah Anda untuk akurasi perhitungan nisab yang lebih tepat.
-          </p>
-        </div>
-      </div>
+
     </div>
   );
 }
