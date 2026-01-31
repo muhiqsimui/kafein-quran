@@ -15,12 +15,12 @@ interface ShareAyahDialogProps {
 }
 
 const THEME_OPTIONS: { id: ShareTheme; label: string; colors: string[] }[] = [
-  { id: 'midnight', label: 'Midnight', colors: ['#0f172a', '#1e293b'] },
-  { id: 'emerald', label: 'Emerald', colors: ['#064e3b', '#065f46'] },
-  { id: 'sunset', label: 'Sunset', colors: ['#4c1d95', '#831843'] },
-  { id: 'ocean', label: 'Ocean', colors: ['#1e3a8a', '#1e40af'] },
-  { id: 'rose', label: 'Rose', colors: ['#881337', '#4c0519'] },
-  { id: 'minimal', label: 'Minimal', colors: ['#ffffff', '#f8fafc'] },
+  { id: 'midnight', label: 'Midnight', colors: ['#020617', '#0f172a', '#1e293b'] },
+  { id: 'emerald', label: 'Emerald', colors: ['#064e3b', '#065f46', '#047857'] },
+  { id: 'sunset', label: 'Sunset', colors: ['#4c1d95', '#701a75', '#831843'] },
+  { id: 'ocean', label: 'Ocean', colors: ['#1e3a8a', '#1d4ed8', '#1e40af'] },
+  { id: 'rose', label: 'Rose', colors: ['#881337', '#9f1239', '#4c0519'] },
+  { id: 'minimal', label: 'Minimal', colors: ['#ffffff', '#f8fafc', '#f1f5f9'] },
 ];
 
 export function ShareAyahDialog({
@@ -216,7 +216,7 @@ export function ShareAyahDialog({
                       <div 
                         className="w-full h-12 rounded-lg"
                         style={{ 
-                          background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]})`,
+                          background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}, ${theme.colors[2] || theme.colors[1]})`,
                           border: theme.id === 'minimal' ? '1px solid #e2e8f0' : 'none'
                         }}
                       />
