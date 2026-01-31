@@ -74,21 +74,35 @@ export function VerseList({
     fetchVerses();
   }, [mushafMode, chapterId]);
 
-  // Scroll to highlight or last read on mount
+  // Scroll to highlight, hash, or last read on mount/change
   useEffect(() => {
-    if (highlightAyah) {
-      setLastReadAyah(highlightAyah);
-      const timer = setTimeout(() => {
-        const element = document.getElementById(`ayah-${highlightAyah}`);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-        }
-      }, 500);
-      return () => clearTimeout(timer);
-    } else if (lastRead?.chapterId === chapterId && lastRead.ayahNumber) {
-      setLastReadAyah(lastRead.ayahNumber);
-    }
-  }, [chapterId, highlightAyah, lastRead]);
+    if (!hasMounted) return;
+
+    const scrollToTarget = () => {
+      const hash = window.location.hash;
+      const hashAyah = hash.startsWith('#ayah-') ? parseInt(hash.replace('#ayah-', ''), 10) : null;
+      const targetAyah = highlightAyah || hashAyah;
+
+      if (targetAyah) {
+        setLastReadAyah(targetAyah);
+        const timer = setTimeout(() => {
+          const element = document.getElementById(`ayah-${targetAyah}`);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 800);
+        return () => clearTimeout(timer);
+      } else if (lastRead?.chapterId === chapterId && lastRead.ayahNumber) {
+        setLastReadAyah(lastRead.ayahNumber);
+      }
+    };
+
+    scrollToTarget();
+
+    // Handle hash changes within the same page
+    window.addEventListener('hashchange', scrollToTarget);
+    return () => window.removeEventListener('hashchange', scrollToTarget);
+  }, [chapterId, highlightAyah, lastRead, hasMounted]);
 
   useScrollToAyah(currentAyah);
 
