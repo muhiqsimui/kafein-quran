@@ -41,6 +41,15 @@ export default function ZakatPage() {
 
   // Zakat Fitrah State
   const [personCount, setPersonCount] = useState<number>(1);
+  const [fitrahType, setFitrahType] = useState<string>("beras");
+
+  const fitrahCommodities = [
+    { id: "beras", name: "Beras", weight: 2.5, label: "Beras (2.5 kg)" },
+    { id: "gandum", name: "Gandum", weight: 2.5, label: "Gandum (2.5 kg)" },
+    { id: "kurma", name: "Kurma", weight: 2.5, label: "Kurma (2.5 kg)" },
+    { id: "kismis", name: "Kismis", weight: 2.5, label: "Kismis (2.5 kg)" },
+    { id: "susu", name: "Keju / Susu Kering", weight: 2.5, label: "Susu Kering (2.5 kg)" },
+  ];
 
   // Zakat Perdagangan State
   const [currentAssets, setCurrentAssets] = useState<number>(0);
@@ -53,7 +62,16 @@ export default function ZakatPage() {
 
   // Zakat Pertanian State
   const [harvestWeight, setHarvestWeight] = useState<number>(0);
-  const [irrigationType, setIrrigationType] = useState<"rain" | "mechanical">("rain");
+  const [irrigationType, setIrrigationType] = useState<"rain" | "mechanical" | "mixed">("rain");
+  const [agricultureType, setAgricultureType] = useState<string>("padi");
+
+  const agricultureCommodities = [
+    { id: "padi", name: "Padi / Beras", nisab: 653, unit: "kg" },
+    { id: "jagung", name: "Jagung", nisab: 653, unit: "kg" },
+    { id: "gandum", name: "Gandum", nisab: 653, unit: "kg" },
+    { id: "kurma", name: "Kurma / Anggur", nisab: 653, unit: "kg" },
+    { id: "bijian", name: "Biji-bijian", nisab: 653, unit: "kg" },
+  ];
 
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat("id-ID", {
@@ -83,9 +101,10 @@ export default function ZakatPage() {
         return { totalMaal, reachedNisab, zakatAmount, nisab: nisabGoldYearly, label: "Total Harta" };
       }
       case "fitrah": {
-        const totalWeight = personCount * 2.5; // 2.5kg per person
-        const totalMoney = personCount * 3.5 * ricePrice; // Or 3.5 Liters
-        return { totalWeight, totalMoney, zakatAmount: totalMoney, reachedNisab: true, nisab: 0 };
+        const selectedCommodity = fitrahCommodities.find(c => c.id === fitrahType) || fitrahCommodities[0];
+        const totalWeight = personCount * selectedCommodity.weight;
+        const totalMoney = personCount * selectedCommodity.weight * ricePrice; 
+        return { totalWeight, totalMoney, zakatAmount: totalMoney, reachedNisab: true, nisab: 0, weightUnit: "kg" };
       }
       case "perdagangan": {
         const totalTrade = currentAssets + receivables - shortTermDebt;
@@ -99,15 +118,16 @@ export default function ZakatPage() {
         return { goldZakat, silverZakat, zakatAmount: goldZakat + silverZakat, reachedNisab: goldWeight >= 85 || silverWeight >= 595, nisab: 0 };
       }
       case "pertanian": {
-        const rate = irrigationType === "rain" ? 0.1 : 0.05;
-        const reachedNisab = harvestWeight >= nisabGrain;
+        const rate = irrigationType === "rain" ? 0.1 : irrigationType === "mixed" ? 0.075 : 0.05;
+        const selectedAgri = agricultureCommodities.find(a => a.id === agricultureType) || agricultureCommodities[0];
+        const reachedNisab = harvestWeight >= selectedAgri.nisab;
         const zakatAmount = reachedNisab ? harvestWeight * rate : 0;
-        return { harvestWeight, reachedNisab, zakatAmount, nisab: nisabGrain, label: "Hasil Panen" };
+        return { harvestWeight, reachedNisab, zakatAmount, nisab: selectedAgri.nisab, label: "Hasil Panen" };
       }
       default:
         return { totalIncome: 0, reachedNisab: false, zakatAmount: 0, nisab: 0, label: "" };
     }
-  }, [activeType, income, otherIncome, debt, savings, investments, property, personCount, currentAssets, receivables, shortTermDebt, goldWeight, silverWeight, harvestWeight, irrigationType, goldPrice, ricePrice]);
+  }, [activeType, income, otherIncome, debt, savings, investments, property, personCount, fitrahType, currentAssets, receivables, shortTermDebt, goldWeight, silverWeight, harvestWeight, irrigationType, agricultureType, goldPrice, ricePrice]);
 
   const menuItems: { id: ZakatType; title: string; icon: LucideIcon; description?: string }[] = [
     { id: "maal", title: "Maal (Harta)", icon: Wallet },
@@ -243,7 +263,7 @@ export default function ZakatPage() {
             </div>
           </div>
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga Beras / Kg</label>
+            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Estimasi Harga {fitrahCommodities.find(c => c.id === fitrahType)?.name || "Beras"} / Kg</label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">Rp</span>
               <input 
@@ -433,18 +453,36 @@ export default function ZakatPage() {
             )}
 
             {activeType === "fitrah" && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Jumlah Anggota Keluarga (Orang)</label>
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={() => setPersonCount(Math.max(1, personCount - 1))}
-                    className="w-12 h-12 rounded-xl border border-border flex items-center justify-center hover:bg-accent"
-                  >- </button>
-                  <span className="text-2xl font-bold flex-1 text-center">{personCount}</span>
-                  <button 
-                    onClick={() => setPersonCount(personCount + 1)}
-                    className="w-12 h-12 rounded-xl border border-border flex items-center justify-center hover:bg-accent"
-                  >+</button>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Jenis Bahan Makanan</label>
+                  <div className="relative">
+                    <select 
+                      value={fitrahType}
+                      onChange={(e) => setFitrahType(e.target.value)}
+                      className="w-full p-3 pr-10 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm appearance-none cursor-pointer"
+                    >
+                      {fitrahCommodities.map(c => (
+                        <option key={c.id} value={c.id}>{c.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Jumlah Anggota Keluarga (Orang)</label>
+                  <div className="flex items-center gap-4">
+                    <button 
+                      onClick={() => setPersonCount(Math.max(1, personCount - 1))}
+                      className="w-12 h-12 rounded-xl border border-border flex items-center justify-center hover:bg-accent"
+                    >- </button>
+                    <span className="text-2xl font-bold flex-1 text-center">{personCount}</span>
+                    <button 
+                      onClick={() => setPersonCount(personCount + 1)}
+                      className="w-12 h-12 rounded-xl border border-border flex items-center justify-center hover:bg-accent"
+                    >+</button>
+                  </div>
                 </div>
               </div>
             )}
@@ -520,7 +558,22 @@ export default function ZakatPage() {
             {activeType === "pertanian" && (
               <>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Hasil Panen (Kilogram / Gabah)</label>
+                  <label className="text-sm font-medium">Jenis Hasil Pertanian</label>
+                  <div className="relative">
+                    <select 
+                      value={agricultureType}
+                      onChange={(e) => setAgricultureType(e.target.value)}
+                      className="w-full p-3 pr-10 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm appearance-none cursor-pointer"
+                    >
+                      {agricultureCommodities.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Hasil Panen (Kilogram)</label>
                   <input 
                     type="number" 
                     value={harvestWeight || ""} 
@@ -528,27 +581,51 @@ export default function ZakatPage() {
                     className="w-full p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20"
                     placeholder="0"
                   />
+                  <p className="text-[10px] text-muted-foreground italic">*Nisab {agricultureCommodities.find(a => a.id === agricultureType)?.name} adalah {agricultureCommodities.find(a => a.id === agricultureType)?.nisab} kg</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Metode Pengairan</label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 gap-2">
                     <button
                       onClick={() => setIrrigationType("rain")}
                       className={cn(
-                        "p-3 rounded-xl border text-sm transition-all",
-                        irrigationType === "rain" ? "bg-primary/20 border-primary text-primary font-bold" : "bg-accent/50 border-border"
+                        "p-3 rounded-xl border text-sm transition-all text-left flex flex-col gap-1",
+                        irrigationType === "rain" ? "bg-primary/20 border-primary shadow-sm" : "bg-accent/50 border-border hover:bg-accent"
                       )}
                     >
-                      Alami (10%)
+                      <div className="flex justify-between items-center w-full">
+                        <span className={cn("font-bold", irrigationType === "rain" ? "text-primary" : "")}>Alami (10%)</span>
+                        {irrigationType === "rain" && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">Menggunakan air hujan, sungai, atau mata air tanpa biaya tambahan.</span>
                     </button>
+                    
                     <button
                       onClick={() => setIrrigationType("mechanical")}
                       className={cn(
-                        "p-3 rounded-xl border text-sm transition-all",
-                        irrigationType === "mechanical" ? "bg-primary/20 border-primary text-primary font-bold" : "bg-accent/50 border-border"
+                        "p-3 rounded-xl border text-sm transition-all text-left flex flex-col gap-1",
+                        irrigationType === "mechanical" ? "bg-primary/20 border-primary shadow-sm" : "bg-accent/50 border-border hover:bg-accent"
                       )}
                     >
-                      Bantuan (5%)
+                      <div className="flex justify-between items-center w-full">
+                        <span className={cn("font-bold", irrigationType === "mechanical" ? "text-primary" : "")}>Bantuan / Berbiaya (5%)</span>
+                        {irrigationType === "mechanical" && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">Menggunakan alat bantu (pompa, air beli, dsb) yang mengeluarkan biaya.</span>
+                    </button>
+
+                    <button
+                      onClick={() => setIrrigationType("mixed")}
+                      className={cn(
+                        "p-3 rounded-xl border text-sm transition-all text-left flex flex-col gap-1",
+                        irrigationType === "mixed" ? "bg-primary/20 border-primary shadow-sm" : "bg-accent/50 border-border hover:bg-accent"
+                      )}
+                    >
+                      <div className="flex justify-between items-center w-full">
+                        <span className={cn("font-bold", irrigationType === "mixed" ? "text-primary" : "")}>Campuran (7.5%)</span>
+                        {irrigationType === "mixed" && <CheckCircle2 className="w-4 h-4 text-primary" />}
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">Perpaduan antara pengairan alami dan bantuan yang mengeluarkan biaya.</span>
                     </button>
                   </div>
                 </div>
@@ -574,11 +651,29 @@ export default function ZakatPage() {
             
             <div className="space-y-1">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Wajib Zakat</h3>
-              <p className="text-4xl font-black tracking-tight">
-                {activeType === "pertanian" 
-                  ? `${results.zakatAmount.toFixed(1)} kg` 
-                  : formatCurrency(results.zakatAmount).replace(",00", "")}
-              </p>
+              <div className="flex flex-col items-center">
+                <p className="text-4xl font-black tracking-tight">
+                  {activeType === "pertanian" 
+                    ? `${results.zakatAmount.toFixed(1)} kg` 
+                    : activeType === "fitrah"
+                      ? `${results.totalWeight} kg`
+                      : formatCurrency(results.zakatAmount).replace(",00", "")}
+                </p>
+                {(activeType === "fitrah" || activeType === "pertanian") && (
+                  <p className="text-xs font-medium text-muted-foreground mt-1 uppercase tracking-wider">
+                    {activeType === "fitrah" 
+                      ? fitrahCommodities.find(c => c.id === fitrahType)?.name
+                      : agricultureCommodities.find(a => a.id === agricultureType)?.name}
+                  </p>
+                )}
+              </div>
+
+              {activeType === "fitrah" && (
+                <p className="text-sm font-bold text-primary bg-primary/10 px-4 py-2 rounded-2xl mt-2 flex items-center gap-2">
+                  <Coins className="w-4 h-4" />
+                  Setara {formatCurrency(results.zakatAmount).replace(",00", "")}
+                </p>
+              )}
             </div>
 
             <div className="w-full pt-4 border-t border-border/50">
@@ -634,8 +729,8 @@ export default function ZakatPage() {
     <p className="text-xs leading-relaxed text-muted-foreground">
       Zakat fitrah wajib bagi setiap jiwa Muslim dan ditunaikan sebelum shalat
       Idul Fitri. Standarnya
-      <span className="font-medium text-foreground"> 2,5 kg beras </span>
-      atau nilai setara.
+      <span className="font-medium text-foreground"> 2,5 kg makanan pokok </span>
+      (seperti beras, gandum, atau kurma) atau nilai setara.
     </p>
   )}
 
@@ -662,26 +757,14 @@ export default function ZakatPage() {
   {activeType === "pertanian" && (
     <p className="text-xs leading-relaxed text-muted-foreground">
       Zakat pertanian dikeluarkan setiap panen apabila hasil mencapai nisab
-      <span className="font-medium text-foreground"> 653 kg gabah</span>,
-      tanpa syarat haul (1 tahun).
+      <span className="font-medium text-foreground"> 653 kg gabah/makanan pokok</span>. 
+      Kadar zakat: <span className="font-medium text-foreground">10%</span> (alami), 
+      <span className="font-medium text-foreground"> 5%</span> (berbiaya), atau 
+      <span className="font-medium text-foreground"> 7,5%</span> (campuran).
     </p>
   )}
 </div>
 
-          {/* <div className="p-5 bg-primary/10 rounded-2xl border border-primary/20 space-y-3">
-            <h4 className="text-sm font-bold flex items-center gap-2 text-primary">
-              <Info className="w-4 h-4" />
-              Catatan Fiqh
-            </h4>
-            <div className="text-[11px] leading-relaxed text-slate-800 dark:text-slate-200 space-y-2">
-              {activeType === "penghasilan" && <p>Zakat penghasilan (profesi) dihitung dari pendapatan bersih bulanan. <b>Batas nisab disetarakan dengan nilai 85 gram emas per tahun</b> (atau dibagi 12 per bulan). Kadar zakat adalah 2.5%.</p>}
-              {activeType === "maal" && <p>Zakat Mal meliputi tabungan, deposito, atau surat berharga yang mengendap 1 tahun (haul) dan mencapai nisab emas 85g.</p>}
-              {activeType === "fitrah" && <p>Wajib bagi setiap jiwa Muslim, dikeluarkan sebelum shalat Idul Fitri. Standar 2.5kg beras atau uang senilai harga beras tersebut.</p>}
-              {activeType === "perdagangan" && <p>Dihitung dari (Modal + Barang + Piutang) - Hutang Jatuh Tempo. Nisab emas 85g, kadar 2.5%.</p>}
-              {activeType === "emas" && <p>Wajib zakat emas jika ≥ 85g, perak ≥ 595g. Dihitung dari nilai emas yang dimiliki dikali 2.5%.</p>}
-              {activeType === "pertanian" && <p>Zakat hasil bumi dikeluarkan setiap panen jika mencapai nisab 653kg gabah. Tanpa perlu haul (1 tahun).</p>}
-            </div>
-          </div> */}
 {/* Penutup Catatan */}
 
         </div>
