@@ -1,24 +1,40 @@
-'use client';
+"use client";
 
-import { useBookmarkStore } from '@/store/useBookmarkStore';
-import { Bookmark as BookmarkIcon, Trash2, ChevronRight, FileText, PlusCircle, Share2 } from 'lucide-react';
-import Link from 'next/link';
-import { BookmarkNoteDialog } from '@/components/quran/BookmarkNoteDialog';
-import { ShareAyahDialog } from '@/components/quran/ShareAyahDialog';
-import { useState } from 'react';
+import { useBookmarkStore } from "@/store/useBookmarkStore";
+import {
+  Bookmark as BookmarkIcon,
+  Trash2,
+  ChevronRight,
+  FileText,
+  PlusCircle,
+  Share2,
+} from "lucide-react";
+import Link from "next/link";
+import { BookmarkNoteDialog } from "@/components/quran/BookmarkNoteDialog";
+import { ShareAyahDialog } from "@/components/quran/ShareAyahDialog";
+import { useState } from "react";
 
 export default function BookmarksPage() {
   const { bookmarks, removeBookmark, updateBookmarkNote } = useBookmarkStore();
-  const [notingAyah, setNotingAyah] = useState<{ key: string; note?: string } | null>(null);
-  const [sharingBookmark, setSharingBookmark] = useState<typeof bookmarks[0] | null>(null);
+  const [notingAyah, setNotingAyah] = useState<{
+    key: string;
+    note?: string;
+  } | null>(null);
+  const [sharingBookmark, setSharingBookmark] = useState<
+    (typeof bookmarks)[0] | null
+  >(null);
 
   return (
     // Optimasi padding untuk mobile (px-4) dan spacing (gap-6)
     <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 space-y-6 animate-in fade-in duration-500">
       <header className="space-y-1">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Simpanan Saya</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+          Bookmark Saya
+        </h1>
         <p className="text-muted-foreground text-sm sm:text-base">
-          Kumpulan ayat-ayat yang telah Anda simpan.
+          “Barangsiapa yang tidak memiliki ilmu, pemahaman, takwa, dan tadabbur,
+          maka dia tidak akan merasakan kelezatan Al-Qur’an sama sekali.”
+          [al-Burhan fiy ‘Ulumil Qur’an, karya az-Zarkasyiy, 2: 155]
         </p>
       </header>
 
@@ -31,7 +47,7 @@ export default function BookmarksPage() {
           <p className="text-muted-foreground text-sm max-w-[250px] mb-6">
             Cari ayat yang menyentuh hati dan simpan di sini.
           </p>
-          <Link 
+          <Link
             href="/"
             className="w-full sm:w-auto px-8 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-semibold active:scale-95 transition-transform shadow-lg shadow-primary/20"
           >
@@ -41,7 +57,7 @@ export default function BookmarksPage() {
       ) : (
         <div className="grid gap-4">
           {bookmarks.map((bookmark) => (
-            <div 
+            <div
               key={bookmark.ayahKey}
               className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:ring-2 hover:ring-primary/20 transition-all"
             >
@@ -53,15 +69,21 @@ export default function BookmarksPage() {
                     {bookmark.ayahNumber}
                   </div>
                   <div className="sm:hidden">
-                     <h3 className="font-bold text-lg">Surah {bookmark.chapterName}</h3>
-                     <p className="text-xs text-muted-foreground uppercase">{bookmark.ayahKey}</p>
+                    <h3 className="font-bold text-lg">
+                      Surah {bookmark.chapterName}
+                    </h3>
+                    <p className="text-xs text-muted-foreground uppercase">
+                      {bookmark.ayahKey}
+                    </p>
                   </div>
                 </div>
 
                 {/* Text Content */}
                 <div className="flex-1 min-w-0">
                   <div className="hidden sm:block mb-1">
-                    <h3 className="font-bold text-lg leading-none">Surah {bookmark.chapterName}</h3>
+                    <h3 className="font-bold text-lg leading-none">
+                      Surah {bookmark.chapterName}
+                    </h3>
                     <p className="text-[10px] text-muted-foreground uppercase tracking-widest mt-1">
                       Ayat {bookmark.ayahNumber} • {bookmark.ayahKey}
                     </p>
@@ -77,7 +99,7 @@ export default function BookmarksPage() {
                       </div>
                     </div>
                   ) : (
-                    <button 
+                    <button
                       onClick={() => setNotingAyah({ key: bookmark.ayahKey })}
                       className="mt-2 inline-flex items-center gap-2 text-xs font-semibold text-primary hover:underline"
                     >
@@ -98,7 +120,7 @@ export default function BookmarksPage() {
                   >
                     <Share2 className="w-5 h-5" />
                   </button>
-                  
+
                   {bookmark.note && (
                     <button
                       onClick={() => setNotingAyah({ key: bookmark.ayahKey })}
@@ -111,7 +133,8 @@ export default function BookmarksPage() {
 
                   <button
                     onClick={() => {
-                        if(confirm('Hapus bookmark ini?')) removeBookmark(bookmark.ayahKey)
+                      if (confirm("Hapus bookmark ini?"))
+                        removeBookmark(bookmark.ayahKey);
                     }}
                     className="p-2.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
                     aria-label="Hapus"
@@ -141,7 +164,7 @@ export default function BookmarksPage() {
           if (notingAyah) updateBookmarkNote(notingAyah.key, note);
         }}
         verseKey={notingAyah?.key || ""}
-        initialNote={bookmarks.find(b => b.ayahKey === notingAyah?.key)?.note}
+        initialNote={bookmarks.find((b) => b.ayahKey === notingAyah?.key)?.note}
       />
 
       {sharingBookmark && (
