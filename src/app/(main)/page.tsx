@@ -13,6 +13,7 @@ import {
   Clock,
   ChevronLeft,
   Wallet,
+  CheckSquare,
 } from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
@@ -48,6 +49,14 @@ const mainMenuItems = [
     icon: Wallet,
     href: "/zakat",
     color: "bg-blue-500/10 text-blue-600",
+  },
+  {
+    id: "istiqomah",
+    title: "Catatan Istiqomah",
+    description: "Atur dan pantau rutinitas ibadah harian Anda",
+    icon: CheckSquare,
+    href: "/istiqomah",
+    color: "bg-amber-500/10 text-amber-600",
   },
 ];
 
