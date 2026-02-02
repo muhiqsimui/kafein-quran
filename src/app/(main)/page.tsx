@@ -14,6 +14,8 @@ import {
   ChevronLeft,
   Wallet,
   CheckSquare,
+  LayoutGrid,
+  Calendar,
 } from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
@@ -43,6 +45,14 @@ const mainMenuItems = [
     color: "bg-rose-500/10 text-rose-600",
   },
   {
+    id: "istiqomah",
+    title: "Catatan Istiqomah",
+    description: "Atur dan pantau rutinitas ibadah harian Anda",
+    icon: CheckSquare,
+    href: "/istiqomah",
+    color: "bg-amber-500/10 text-amber-600",
+  },
+  {
     id: "zakat",
     title: "Hitung Zakat",
     description: "Hitung berbagai jenis zakat dengan mudah",
@@ -51,12 +61,12 @@ const mainMenuItems = [
     color: "bg-blue-500/10 text-blue-600",
   },
   {
-    id: "istiqomah",
-    title: "Catatan Istiqomah",
-    description: "Atur dan pantau rutinitas ibadah harian Anda",
-    icon: CheckSquare,
-    href: "/istiqomah",
-    color: "bg-amber-500/10 text-amber-600",
+    id: "others",
+    title: "Menu Lainnya",
+    description: "Lebih banyak menu seru lainnya",
+    icon: LayoutGrid,
+    color: "bg-slate-500/10 text-slate-600",
+    isAction: true,
   },
 ];
 
@@ -91,8 +101,35 @@ const quranMenuItems = [
   },
 ];
 
+const otherMenuItems = [
+  {
+    title: "Kalender Islam",
+    description: "Kalender Hijriyah, hari penting & jadwal puasa sunnah",
+    icon: Calendar,
+    href: "/calendar",
+    color: "bg-cyan-500/10 text-cyan-600",
+  },
+];
+
 export default function DashboardPage() {
-  const [activeMenu, setActiveMenu] = useState<"main" | "quran">("main");
+  const [activeMenu, setActiveMenu] = useState<"main" | "quran" | "others">("main");
+
+  const getMenuTitle = () => {
+    switch (activeMenu) {
+      case "quran":
+        return "Baca Al-Quran";
+      case "others":
+        return "Menu Lainnya";
+      default:
+        return "Menu Utama";
+    }
+  };
+
+  const currentMenuItems = () => {
+    if (activeMenu === "quran") return quranMenuItems;
+    if (activeMenu === "others") return otherMenuItems;
+    return mainMenuItems;
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
@@ -111,7 +148,7 @@ export default function DashboardPage() {
 
       <section className="space-y-4">
         <div className="flex items-center gap-2">
-          {activeMenu === "quran" && (
+          {activeMenu !== "main" && (
             <button
               onClick={() => setActiveMenu("main")}
               className="p-1 -ml-1 hover:bg-accent rounded-full transition-colors"
@@ -120,57 +157,21 @@ export default function DashboardPage() {
               <ChevronLeft className="w-6 h-6" />
             </button>
           )}
-          <h2 className="text-xl font-bold">
-            {activeMenu === "main" ? "Menu Utama" : "Baca Al-Quran"}
-          </h2>
+          <h2 className="text-xl font-bold">{getMenuTitle()}</h2>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
-          {activeMenu === "main"
-            ? mainMenuItems.map((item) =>
-                item.isAction ? (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveMenu("quran")}
-                    className="group p-4 md:p-6 text-left rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
-                  >
-                    <div
-                      className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${item.color} flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}
-                    >
-                      <item.icon className="w-5 h-5 md:w-6 md:h-6" />
-                    </div>
-                    <h3 className="text-base md:text-lg font-bold mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed italic line-clamp-2 md:line-clamp-none">
-                      {item.description}
-                    </p>
-                  </button>
-                ) : (
-                  <Link
-                    key={item.href}
-                    href={item.href!}
-                    className="group p-4 md:p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
-                  >
-                    <div
-                      className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${item.color} flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}
-                    >
-                      <item.icon className="w-5 h-5 md:w-6 md:h-6" />
-                    </div>
-                    <h3 className="text-base md:text-lg font-bold mb-1">
-                      {item.title}
-                    </h3>
-                    <p className="text-xs md:text-sm text-muted-foreground leading-relaxed italic line-clamp-2 md:line-clamp-none">
-                      {item.description}
-                    </p>
-                  </Link>
-                )
-              )
-            : quranMenuItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="group p-4 md:p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
+          {currentMenuItems().map((item, index) => {
+            const isMainAction = "id" in item && item.isAction;
+
+            if (isMainAction) {
+              return (
+                <button
+                  key={(item as any).id}
+                  onClick={() =>
+                    setActiveMenu((item as any).id === "quran" ? "quran" : "others")
+                  }
+                  className="group p-4 md:p-6 text-left rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
                 >
                   <div
                     className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${item.color} flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}
@@ -183,8 +184,30 @@ export default function DashboardPage() {
                   <p className="text-xs md:text-sm text-muted-foreground leading-relaxed italic line-clamp-2 md:line-clamp-none">
                     {item.description}
                   </p>
-                </Link>
-              ))}
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href!}
+                className="group p-4 md:p-6 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
+              >
+                <div
+                  className={`w-10 h-10 md:w-12 md:h-12 rounded-xl ${item.color} flex items-center justify-center mb-3 md:mb-4 group-hover:scale-110 transition-transform`}
+                >
+                  <item.icon className="w-5 h-5 md:w-6 md:h-6" />
+                </div>
+                <h3 className="text-base md:text-lg font-bold mb-1">
+                  {item.title}
+                </h3>
+                <p className="text-xs md:text-sm text-muted-foreground leading-relaxed italic line-clamp-2 md:line-clamp-none">
+                  {item.description}
+                </p>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
