@@ -59,7 +59,7 @@ Aplikasi ini menggunakan sumber data terbuka yang tepercaya untuk memastikan aku
 4.  **[EveryAyah.com](https://everyayah.com/)**: Database audio murattal per ayat berkualitas tinggi.
 5.  **[Nominatim OSM](https://nominatim.org/)**: Layanan pencarian lokasi (geocoding) dunia yang digunakan untuk fitur jadwal shalat.
 6.  **[Quran.com API v4](https://api.quran.com/docs)**: Referensi untuk struktur data Juz dan Page.
-
+7. **[ianoit/data-hadist dari tafsirq.com](https://github.com/ianoit/data-hadist)**: Sumber untuk data hadist.
 ---
 
 ## 🛠️ Tech Stack

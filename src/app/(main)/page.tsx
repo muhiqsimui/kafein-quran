@@ -16,6 +16,7 @@ import {
   CheckSquare,
   LayoutGrid,
   Calendar,
+  Scroll,
 } from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
@@ -108,6 +109,13 @@ const otherMenuItems = [
     icon: Calendar,
     href: "/calendar",
     color: "bg-cyan-500/10 text-cyan-600",
+  },
+  {
+    title: "Baca Hadist",
+    description: "Kumpulan hadist dari berbagai perawi",
+    icon: Scroll,
+    href: "/hadith",
+    color: "bg-orange-500/10 text-orange-600",
   },
 ];
 
