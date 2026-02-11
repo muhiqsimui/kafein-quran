@@ -74,9 +74,19 @@ export function VerseList({
     fetchVerses();
   }, [mushafMode, chapterId]);
 
-  // Scroll to highlight, hash, or last read on mount/change
+  // Sync state from lastRead store on mount/change
   useEffect(() => {
     if (!hasMounted) return;
+    if (lastRead?.chapterId === chapterId && lastRead.ayahNumber) {
+      setLastReadAyah(lastRead.ayahNumber);
+    }
+  }, [chapterId, lastRead, hasMounted]);
+
+  // Scroll to highlight or hash on mount/change
+  useEffect(() => {
+    if (!hasMounted) return;
+
+    let timer: NodeJS.Timeout;
 
     const scrollToTarget = () => {
       const hash = window.location.hash;
@@ -85,15 +95,13 @@ export function VerseList({
 
       if (targetAyah) {
         setLastReadAyah(targetAyah);
-        const timer = setTimeout(() => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
           const element = document.getElementById(`ayah-${targetAyah}`);
           if (element) {
             element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         }, 800);
-        return () => clearTimeout(timer);
-      } else if (lastRead?.chapterId === chapterId && lastRead.ayahNumber) {
-        setLastReadAyah(lastRead.ayahNumber);
       }
     };
 
@@ -101,8 +109,11 @@ export function VerseList({
 
     // Handle hash changes within the same page
     window.addEventListener('hashchange', scrollToTarget);
-    return () => window.removeEventListener('hashchange', scrollToTarget);
-  }, [chapterId, highlightAyah, lastRead, hasMounted]);
+    return () => {
+      if (timer) clearTimeout(timer);
+      window.removeEventListener('hashchange', scrollToTarget);
+    };
+  }, [chapterId, highlightAyah, hasMounted]);
 
   useScrollToAyah(currentAyah);
 
