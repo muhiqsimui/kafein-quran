@@ -1,6 +1,6 @@
-import { getNarrators, getPaginatedHadiths } from "@/lib/hadith-service";
-import { HadithList } from "@/components/hadith/HadithList";
-import { notFound } from "next/navigation";
+import { getHadisById } from "@/lib/hadith-service";
+import HadithDetailPage from "@/components/hadith/HadithDetailPage";
+import { notFound, redirect } from "next/navigation";
 
 interface HadithPageProps {
   params: Promise<{
@@ -10,35 +10,50 @@ interface HadithPageProps {
 
 export async function generateMetadata({ params }: HadithPageProps) {
   const { slug } = await params;
-  const narrators = await getNarrators();
-  const narrator = narrators.find((n) => n.slug === slug);
+  const id = parseInt(slug);
 
-  if (!narrator) return { title: "Hadist Tidak Ditemukan" };
+  if (isNaN(id)) return { title: "Cari Hadis - Kafein Quran" };
 
-  return {
-    title: `Hadist ${narrator.name} - Kafein Quran`,
-    description: `Baca kumpulan hadist dari perawi ${narrator.name} lengkap dengan teks Arab dan terjemahan Indonesia.`,
-  };
+  try {
+    const hadis = await getHadisById(id);
+    const previewText =
+      hadis.text.id.length > 150
+        ? hadis.text.id.substring(0, 150) + "..."
+        : hadis.text.id;
+
+    return {
+      title: `Hadis #${hadis.id} - Ensiklopedia Hadis`,
+      description: previewText,
+      openGraph: {
+        title: `Hadis #${hadis.id} - Kafein Quran`,
+        description: previewText,
+      },
+    };
+  } catch (error) {
+    console.error("Metadata error:", error);
+    return { title: "Hadis - Kafein Quran" };
+  }
 }
 
-export default async function HadithNarratorPage({ params }: HadithPageProps) {
+export default async function HadithByIdPage({ params }: HadithPageProps) {
   const { slug } = await params;
-  const narrators = await getNarrators();
-  const narrator = narrators.find((n) => n.slug === slug);
+  const id = parseInt(slug);
 
-  if (!narrator) {
-    notFound();
+  // Handle legacy narrator slugs or invalid IDs by searching
+  if (isNaN(id)) {
+    redirect(`/hadith?q=${encodeURIComponent(slug)}`);
   }
 
-  const initialData = await getPaginatedHadiths(slug, 1, 20);
-
-  return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <HadithList
-        slug={slug}
-        narratorName={narrator.name}
-        initialData={initialData}
-      />
-    </div>
-  );
+  try {
+    const hadis = await getHadisById(id);
+    return (
+      <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <HadithDetailPage hadis={hadis} />
+      </div>
+    );
+  } catch (error) {
+    console.error("Page error:", error);
+    // If not found, show 404
+    notFound();
+  }
 }

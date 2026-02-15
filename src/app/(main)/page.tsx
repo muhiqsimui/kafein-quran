@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   Calendar,
   Scroll,
+  Users,
 } from "lucide-react";
 import { LastReadCard } from "@/components/quran/LastReadCard";
 
@@ -111,11 +112,18 @@ const otherMenuItems = [
     color: "bg-cyan-500/10 text-cyan-600",
   },
   {
-    title: "Baca Hadist",
+    title: "Ensiklopedia Hadist",
     description: "Kumpulan hadist dari berbagai perawi",
     icon: Scroll,
     href: "/hadith",
     color: "bg-orange-500/10 text-orange-600",
+  },
+  {
+    title: "Profil Perawi",
+    description: "Biografi dan riwayat hidup para perawi hadis",
+    icon: Users,
+    href: "/scholars",
+    color: "bg-indigo-500/10 text-indigo-600",
   },
 ];
 

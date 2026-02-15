@@ -1,13 +1,23 @@
-import { getNarrators } from "@/lib/hadith-service";
 import HadithIndex from "@/components/hadith/HadithIndex";
+import { Suspense } from "react";
+import { Loader2 } from "lucide-react";
 
 export const metadata = {
-  title: "Baca Hadist - Kafein Quran",
-  description: "Daftar perawi hadist lengkap dengan ribuan hadist sahih",
+  title: "Ensiklopedia Hadis - Kafein Quran",
+  description:
+    "Ensiklopedia Terjemahan Hadis-hadis Nabi lengkap dengan teks Arab, terjemahan Indonesia, takhrij, hikmah, dan data perawi.",
 };
 
-export default async function HadithPage() {
-  const narrators = await getNarrators();
-
-  return <HadithIndex narrators={narrators} />;
+export default function HadithPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      }
+    >
+      <HadithIndex />
+    </Suspense>
+  );
 }
