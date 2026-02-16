@@ -154,7 +154,7 @@ export default function ScholarsIndex() {
   useEffect(() => {
     const init = async () => {
       try {
-        const res = await fetch("/perawi.json");
+        const res = await fetch("/data/perawi.json");
         const json = await res.json();
         if (json.status) {
           setMeta(json.data);

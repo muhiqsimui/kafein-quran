@@ -18,7 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { DZIKIR_DATA, DzikirCategory, DzikirItem } from "@/data/dzikirData";
+import { DzikirCategory, DzikirItem } from "@/types";
 
 const DZIKIR_HINTS = {
   Subhanallah: "Maha Suci Allah",
@@ -48,13 +48,30 @@ export default function DzikirPage() {
     setAssistDzikir,
   } = useDzikirStore();
 
+  const [dzikirData, setDzikirData] = useState<DzikirCategory[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isAssistModalOpen, setIsAssistModalOpen] = useState(false);
   const [showFinishedModal, setShowFinishedModal] = useState(false);
   const audioContextRef = useRef<AudioContext | null>(null);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetch("/data/dzikirData.json");
+        const data = await res.json();
+        setDzikirData(data);
+      } catch (error) {
+        console.error("Failed to fetch dzikir data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   // Get current assist data
-  const currentCategory = DZIKIR_DATA.find((c) => c.id === assistCategoryId);
+  const currentCategory = dzikirData.find((c) => c.id === assistCategoryId);
   const currentDzikirItem =
     currentCategory?.items.find((i) => i.id === activeDzikirId) ||
     currentCategory?.items[0];
@@ -416,7 +433,7 @@ export default function DzikirPage() {
                   <div className="space-y-4 animate-in slide-in-from-bottom-2">
                      <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-2">Pilih Kategori</p>
                      <div className="grid grid-cols-1 gap-2">
-                        {DZIKIR_DATA.map((cat) => (
+                        {dzikirData.map((cat: DzikirCategory) => (
                            <button
                             key={cat.id}
                             onClick={() => setAssistCategory(cat.id)}

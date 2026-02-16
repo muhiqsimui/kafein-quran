@@ -8,7 +8,7 @@ import { removeArabicDiacritics } from './utils';
 // Helper to read JSON
 async function readJson(relativePath: string) {
   // Turbopack warning mitigation: Obfuscate path to prevent static globbing
-  const segments = ['data', 'quran-json', 'dist'];
+  const segments = ['public', 'data', 'quran-json', 'dist'];
   const filePath = path.resolve(process.cwd(), ...segments, relativePath);
   try {
     const content = await fs.readFile(filePath, 'utf-8');
@@ -52,7 +52,7 @@ function highlightMatch(text: string, query: string): string {
 }
 
 async function readKemenagJson(chapterId: number | string) {
-  const filePath = path.resolve(process.cwd(), 'data', 'Al-Quran-JSON-Indonesia-Kemenag', 'Surat', `${chapterId}.json`);
+  const filePath = path.resolve(process.cwd(), 'public', 'data', 'Al-Quran-JSON-Indonesia-Kemenag', 'Surat', `${chapterId}.json`);
   try {
     const content = await fs.readFile(filePath, 'utf-8');
     return JSON.parse(content);

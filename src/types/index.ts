@@ -117,3 +117,19 @@ export interface SearchResponse {
 }
 
 export type SearchParams = { [key: string]: string | string[] | undefined };
+
+export interface DzikirItem {
+  id: string;
+  title: string;
+  arabic: string;
+  translation: string;
+  target: number;
+  note?: string;
+}
+
+export interface DzikirCategory {
+  id: string;
+  name: string;
+  items: DzikirItem[];
+}
+
