@@ -1,6 +1,6 @@
 "use client";
 
-import { X, Share2, Copy, Download, Check, Loader2, Maximize2, Type, Palette } from "lucide-react";
+import { X, Share2, Copy, Download, Check, Loader2, Maximize2, Type, Palette, Camera, ImagePlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useHadithCanvas, ShareTheme } from "@/hooks/useHadithCanvas";
@@ -22,6 +22,7 @@ const THEME_OPTIONS: { id: ShareTheme; label: string; colors: string[] }[] = [
   { id: 'ocean', label: 'Ocean', colors: ['#1e3a8a', '#1d4ed8', '#1e40af'] },
   { id: 'rose', label: 'Rose', colors: ['#881337', '#9f1239', '#4c0519'] },
   { id: 'minimal', label: 'Minimal', colors: ['#ffffff', '#f8fafc', '#f1f5f9'] },
+  { id: 'custom', label: 'Custom', colors: ['#475569', '#334155', '#1e293b'] },
 ];
 
 export function ShareHadithDialog({
@@ -40,6 +41,8 @@ export function ShareHadithDialog({
   
   const [isCopied, setIsCopied] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [customBg, setCustomBg] = useState<string | null>(null);
+  const [customTextColor, setCustomTextColor] = useState('#ffffff');
 
   const { previewUrl, isGenerating, generateImage } = useHadithCanvas();
 
@@ -66,12 +69,14 @@ export function ShareHadithDialog({
         showArabic,
         showTranslation,
         showGrade,
-        theme: selectedTheme
+        theme: selectedTheme,
+        customBg: selectedTheme === 'custom' && customBg ? customBg : undefined,
+        customTextColor
       });
     } else {
       document.body.style.overflow = "unset";
     }
-  }, [isOpen, showArabic, showTranslation, showGrade, selectedTheme, generateImage, id, textArabic, translation, takhrij, grade]);
+  }, [isOpen, showArabic, showTranslation, showGrade, selectedTheme, customBg, customTextColor, generateImage, id, textArabic, translation, takhrij, grade]);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/hadith/${id}`;
@@ -150,10 +155,91 @@ export function ShareHadithDialog({
               <div className="grid grid-cols-3 gap-3">
                 {THEME_OPTIONS.map((theme) => (
                   <button key={theme.id} onClick={() => setSelectedTheme(theme.id)} className={cn("relative flex flex-col items-center gap-2 p-2 rounded-xl border transition-all", selectedTheme === theme.id ? "border-primary bg-primary/5 ring-1 ring-primary" : "border-border hover:border-primary/50")}>
-                    <div className="w-full h-12 rounded-lg" style={{ background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}, ${theme.colors[2] || theme.colors[1]})` }} />
+                    <div className="w-full h-12 rounded-lg" style={{ background: `linear-gradient(135deg, ${theme.colors[0]}, ${theme.colors[1]}, ${theme.colors[2] || theme.colors[1]})`, border: theme.id === 'minimal' ? '1px solid #e2e8f0' : 'none' }} />
                     <span className="text-[10px] font-bold">{theme.label}</span>
+                    {selectedTheme === theme.id && (
+                      <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                        <Check className="w-2.5 h-2.5 text-white" />
+                      </div>
+                    )}
                   </button>
                 ))}
+              </div>
+
+              {selectedTheme === 'custom' && (
+                <div className="pt-2 flex flex-col gap-3">
+                  <div className="flex gap-2">
+                    <label className="flex-1 cursor-pointer" htmlFor="upload-hadith">
+                      <input 
+                        id="upload-hadith"
+                        type="file" 
+                        accept="image/*" 
+                        className="sr-only" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => setCustomBg(ev.target?.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <div className="flex items-center justify-center gap-2 p-3 border border-dashed border-primary/50 bg-primary/5 rounded-xl text-xs font-bold text-primary hover:bg-primary/10 transition-colors">
+                        <ImagePlus className="w-4 h-4" /> Upload Foto
+                      </div>
+                    </label>
+                    <label className="flex-1 cursor-pointer" htmlFor="camera-hadith">
+                      <input 
+                        id="camera-hadith"
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment"
+                        className="sr-only" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (ev) => setCustomBg(ev.target?.result as string);
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                      <div className="flex items-center justify-center gap-2 p-3 border border-dashed border-primary/50 bg-primary/5 rounded-xl text-xs font-bold text-primary hover:bg-primary/10 transition-colors">
+                        <Camera className="w-4 h-4" /> Ambil Foto
+                      </div>
+                    </label>
+                  </div>
+                  {customBg && (
+                    <button onClick={() => setCustomBg(null)} className="text-[10px] text-destructive font-bold uppercase tracking-wider text-center">Hapus Latar Kustom</button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Text Color Customization */}
+            <div className="space-y-4">
+              <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2"><Palette className="w-4 h-4" /> Warna Tulisan</p>
+              <div className="flex items-center gap-4">
+                <div className="flex-1 grid grid-cols-6 gap-2">
+                  {['#ffffff', '#f8fafc', '#ecfdf5', '#fff7ed', '#fef2f2', '#f0f9ff'].map((color) => (
+                    <button
+                      key={color}
+                      onClick={() => setCustomTextColor(color)}
+                      className={cn(
+                        "w-8 h-8 rounded-full border border-border shadow-sm transition-transform active:scale-95",
+                        customTextColor === color && "ring-2 ring-primary ring-offset-2"
+                      )}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+                <div className="shrink-0 w-px h-8 bg-border" />
+                <div className="relative group">
+                  <input type="color" value={customTextColor} onChange={(e) => setCustomTextColor(e.target.value)} className="w-10 h-10 rounded-xl cursor-pointer border-0 bg-transparent" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center pointer-events-none">
+                    <Type className="w-2 h-2 text-white" />
+                  </div>
+                </div>
               </div>
             </div>
 

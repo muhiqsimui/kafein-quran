@@ -1,4 +1,4 @@
-import { X, Share2, Copy, Download, Check, Link2, FileText, Loader2, Maximize2, Type, Languages, Palette } from "lucide-react";
+import { X, Share2, Copy, Download, Check, Link2, FileText, Loader2, Maximize2, Type, Languages, Palette, Camera, ImagePlus, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useAyahCanvas, ShareTheme } from "@/hooks/useAyahCanvas";
@@ -21,6 +21,7 @@ const THEME_OPTIONS: { id: ShareTheme; label: string; colors: string[] }[] = [
   { id: 'ocean', label: 'Ocean', colors: ['#1e3a8a', '#1d4ed8', '#1e40af'] },
   { id: 'rose', label: 'Rose', colors: ['#881337', '#9f1239', '#4c0519'] },
   { id: 'minimal', label: 'Minimal', colors: ['#ffffff', '#f8fafc', '#f1f5f9'] },
+  { id: 'custom', label: 'Custom', colors: ['#475569', '#334155', '#1e293b'] },
 ];
 
 export function ShareAyahDialog({
@@ -40,6 +41,8 @@ export function ShareAyahDialog({
   
   const [isCopied, setIsCopied] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [customBg, setCustomBg] = useState<string | null>(null);
+  const [customTextColor, setCustomTextColor] = useState('#ffffff');
 
   // Custom Hook untuk handle canvas rendering
   const { previewUrl, isGenerating, generateImage } = useAyahCanvas();
@@ -72,13 +75,15 @@ export function ShareAyahDialog({
         includeNote,
         showArabic,
         showTranslation,
-        theme: selectedTheme
+        theme: selectedTheme,
+        customBg: selectedTheme === 'custom' && customBg ? customBg : undefined,
+        customTextColor
       });
     } else {
       document.body.style.overflow = "unset";
     }
     return () => { document.body.style.overflow = "unset"; };
-  }, [isOpen, includeNote, showArabic, showTranslation, selectedTheme, generateImage, chapterName, ayahNumber, textArabic, translation, note]);
+  }, [isOpen, includeNote, showArabic, showTranslation, selectedTheme, customBg, customTextColor, generateImage, chapterName, ayahNumber, textArabic, translation, note]);
 
   const handleCopyLink = () => {
     const url = `${window.location.origin}/share/${ayahKey.replace(":", "-")}`;
@@ -228,6 +233,99 @@ export function ShareAyahDialog({
                       )}
                     </button>
                   ))}
+                </div>
+                
+                {selectedTheme === 'custom' && (
+                  <div className="pt-2 flex flex-col gap-3">
+                    <div className="flex gap-2">
+                      <label className="flex-1 cursor-pointer" htmlFor="upload-ayah">
+                        <input 
+                          id="upload-ayah"
+                          type="file" 
+                          accept="image/*" 
+                          className="sr-only" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => setCustomBg(ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2 p-3 border border-dashed border-primary/50 bg-primary/5 rounded-xl text-xs font-bold text-primary hover:bg-primary/10 transition-colors">
+                          <ImagePlus className="w-4 h-4" />
+                          Upload Foto
+                        </div>
+                      </label>
+                      
+                      <label className="flex-1 cursor-pointer" htmlFor="camera-ayah">
+                        <input 
+                          id="camera-ayah"
+                          type="file" 
+                          accept="image/*" 
+                          capture="environment"
+                          className="sr-only" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (ev) => setCustomBg(ev.target?.result as string);
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <div className="flex items-center justify-center gap-2 p-3 border border-dashed border-primary/50 bg-primary/5 rounded-xl text-xs font-bold text-primary hover:bg-primary/10 transition-colors">
+                          <Camera className="w-4 h-4" />
+                          Ambil Foto
+                        </div>
+                      </label>
+                    </div>
+                    {customBg && (
+                       <button 
+                        onClick={() => setCustomBg(null)}
+                        className="text-[10px] text-destructive font-bold uppercase tracking-wider text-center"
+                       >
+                         Hapus Latar Kustom
+                       </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Text Color Customization */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Palette className="w-4 h-4 text-primary" />
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Warna Tulisan</p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 grid grid-cols-6 gap-2">
+                    {['#ffffff', '#B2C8BA', '#E2B0AA', '#AED9E0', '#F4D35E', '#D8BFD8'].map((color) => (
+                      <button
+                        key={color}
+                        onClick={() => setCustomTextColor(color)}
+                        className={cn(
+                          "w-8 h-8 rounded-full border border-border shadow-sm transition-transform active:scale-95",
+                          customTextColor === color && "ring-2 ring-primary ring-offset-2"
+                        )}
+                        style={{ backgroundColor: color }}
+                        aria-label={`Pilih warna ${color}`}
+                      />
+                    ))}
+                  </div>
+                  <div className="shrink-0 w-px h-8 bg-border" />
+                  <div className="relative group">
+                    <input 
+                      type="color" 
+                      value={customTextColor}
+                      onChange={(e) => setCustomTextColor(e.target.value)}
+                      className="w-10 h-10 rounded-xl cursor-pointer border-0 bg-transparent shadow-sm hover:ring-1 hover:ring-primary transition-all"
+                    />
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center pointer-events-none shadow-sm">
+                      <Type className="w-2 h-2 text-white" />
+                    </div>
+                  </div>
                 </div>
               </div>
 

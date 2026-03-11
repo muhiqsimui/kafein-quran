@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type ShareTheme = 'midnight' | 'emerald' | 'sunset' | 'ocean' | 'minimal' | 'rose';
+export type ShareTheme = 'midnight' | 'emerald' | 'sunset' | 'ocean' | 'minimal' | 'rose' | 'custom';
 
 interface GenerateImageProps {
   chapterName: string;
@@ -12,6 +12,8 @@ interface GenerateImageProps {
   showArabic: boolean;
   showTranslation: boolean;
   theme: ShareTheme;
+  customBg?: string; // Data URL
+  customTextColor?: string;
 }
 
 const THEMES: Record<ShareTheme, { bg: string[], primary: string, secondary: string, text: string, accent: string, pattern: boolean }> = {
@@ -62,6 +64,14 @@ const THEMES: Record<ShareTheme, { bg: string[], primary: string, secondary: str
     text: "#0f172a",
     accent: "rgba(15, 23, 42, 0.05)",
     pattern: false
+  },
+  custom: {
+    bg: ["#334155", "#1e293b", "#0f172a"],
+    primary: "#10b981",
+    secondary: "#94a3b8",
+    text: "#ffffff",
+    accent: "rgba(16, 185, 129, 0.25)",
+    pattern: false
   }
 };
 
@@ -79,7 +89,9 @@ export function useAyahCanvas() {
       includeNote, 
       showArabic, 
       showTranslation,
-      theme: themeKey
+      theme: themeKey,
+      customBg,
+      customTextColor
     } = data;
     
     setIsGenerating(true);
@@ -95,7 +107,16 @@ export function useAyahCanvas() {
       console.warn("Font loading skipped", e);
     }
 
-    const theme = THEMES[themeKey] || THEMES.midnight;
+    const theme = { ...(THEMES[themeKey] || THEMES.midnight) };
+    
+    // Override colors if custom color is provided
+    if (customTextColor) {
+      theme.text = customTextColor;
+      theme.secondary = `${customTextColor}CC`; // 80% opacity
+      theme.accent = `${customTextColor}26`;    // 15% opacity for accents/boxes
+      theme.primary = customTextColor;          // Use for highlights too
+    }
+
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -257,7 +278,39 @@ export function useAyahCanvas() {
         ctx.globalAlpha = 1.0;
       }
     };
-    drawBg();
+    
+    const drawCustomBg = async () => {
+      if (customBg) {
+        return new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            // Draw image covering the whole canvas
+            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+            const x = (canvas.width - img.width * scale) / 2;
+            const y = (canvas.height - img.height * scale) / 2;
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            
+            // Add a dark overlay to ensure readability if needed
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            resolve();
+          };
+          img.onerror = () => {
+             drawBg();
+             resolve();
+          };
+          img.src = customBg;
+        });
+      } else {
+        drawBg();
+      }
+    };
+
+    if (themeKey === 'custom' && customBg) {
+        await drawCustomBg();
+    } else {
+        drawBg();
+    }
 
     let cursorY = 150;
 

@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 
-export type ShareTheme = 'midnight' | 'emerald' | 'sunset' | 'ocean' | 'minimal' | 'rose';
+export type ShareTheme = 'midnight' | 'emerald' | 'sunset' | 'ocean' | 'minimal' | 'rose' | 'custom';
 
 interface GenerateImageProps {
   id: number;
@@ -12,6 +12,8 @@ interface GenerateImageProps {
   showArabic: boolean;
   showTranslation: boolean;
   showGrade: boolean;
+  customBg?: string; // Data URL
+  customTextColor?: string;
 }
 
 const THEMES: Record<ShareTheme, { bg: string[], primary: string, secondary: string, text: string, accent: string, pattern: boolean }> = {
@@ -62,6 +64,14 @@ const THEMES: Record<ShareTheme, { bg: string[], primary: string, secondary: str
     text: "#0f172a",
     accent: "rgba(15, 23, 42, 0.05)",
     pattern: false
+  },
+  custom: {
+    bg: ["#334155", "#1e293b", "#0f172a"],
+    primary: "#10b981",
+    secondary: "#94a3b8",
+    text: "#ffffff",
+    accent: "rgba(16, 185, 129, 0.25)",
+    pattern: false
   }
 };
 
@@ -79,7 +89,9 @@ export function useHadithCanvas() {
       theme: themeKey,
       showArabic,
       showTranslation,
-      showGrade
+      showGrade,
+      customBg,
+      customTextColor
     } = data;
     
     setIsGenerating(true);
@@ -96,7 +108,15 @@ export function useHadithCanvas() {
       console.warn("Font loading skipped", e);
     }
 
-    const theme = THEMES[themeKey] || THEMES.midnight;
+    const theme = { ...(THEMES[themeKey] || THEMES.midnight) };
+    
+    // Override colors if custom color is provided
+    if (customTextColor) {
+      theme.text = customTextColor;
+      theme.secondary = `${customTextColor}CC`; // 80% opacity
+      theme.accent = `${customTextColor}26`;    // 15% opacity for accents/boxes
+      theme.primary = customTextColor;          // Use for highlights too
+    }
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
@@ -187,14 +207,15 @@ export function useHadithCanvas() {
     canvas.height = Math.max(1920, totalHeight);
 
     // Draw Background
-    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-    gradient.addColorStop(0, theme.bg[0]);
-    gradient.addColorStop(0.5, theme.bg[1]);
-    gradient.addColorStop(1, theme.bg[2] || theme.bg[1]);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const drawBg = () => {
+      const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+      gradient.addColorStop(0, theme.bg[0]);
+      gradient.addColorStop(0.5, theme.bg[1]);
+      gradient.addColorStop(1, theme.bg[2] || theme.bg[1]);
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (theme.pattern) {
+      if (theme.pattern) {
         ctx.save();
         ctx.globalAlpha = 0.07;
         ctx.strokeStyle = theme.primary;
@@ -208,6 +229,37 @@ export function useHadithCanvas() {
           }
         }
         ctx.restore();
+      }
+    };
+
+    const drawCustomBg = async () => {
+      if (customBg) {
+        return new Promise<void>((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
+            const x = (canvas.width - img.width * scale) / 2;
+            const y = (canvas.height - img.height * scale) / 2;
+            ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            resolve();
+          };
+          img.onerror = () => {
+             drawBg();
+             resolve();
+          };
+          img.src = customBg;
+        });
+      } else {
+        drawBg();
+      }
+    };
+
+    if (themeKey === 'custom' && customBg) {
+        await drawCustomBg();
+    } else {
+        drawBg();
     }
 
     let cursorY = 150;
@@ -255,10 +307,25 @@ export function useHadithCanvas() {
         ctx.fillText(info, canvas.width / 2, cursorY);
     }
 
-    const domain = typeof window !== "undefined" ? window.location.hostname : "quran.kafein.web.id";
+    // 6. Footer
+    ctx.save();
+    const footerY = canvas.height - 120;
     ctx.font = `300 32px ${sansFont}`;
+    ctx.textAlign = "center";
     ctx.fillStyle = theme.secondary;
-    ctx.fillText(domain, canvas.width / 2, canvas.height - 120);
+    
+    // Glassy footer pill
+    if (themeKey !== 'minimal') {
+      ctx.fillStyle = "rgba(255,255,255,0.05)";
+      ctx.beginPath();
+      ctx.roundRect(canvas.width/2 - 200, footerY - 45, 400, 70, 35);
+      ctx.fill();
+    }
+    
+    ctx.fillStyle = theme.secondary;
+    const domain = typeof window !== "undefined" ? window.location.hostname : "quran.kafein.web.id";
+    ctx.fillText(domain, canvas.width / 2, footerY);
+    ctx.restore();
 
     setPreviewUrl(canvas.toDataURL("image/png"));
     setIsGenerating(false);
