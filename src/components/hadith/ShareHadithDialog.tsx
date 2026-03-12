@@ -76,6 +76,7 @@ export function ShareHadithDialog({
     } else {
       document.body.style.overflow = "unset";
     }
+    return () => { document.body.style.overflow = "unset"; };
   }, [isOpen, showArabic, showTranslation, showGrade, selectedTheme, customBg, customTextColor, generateImage, id, textArabic, translation, takhrij, grade]);
 
   const handleCopyLink = () => {
@@ -129,6 +130,11 @@ export function ShareHadithDialog({
             </div>
           ) : previewUrl ? (
             <div className="relative h-full w-full flex items-center justify-center group cursor-zoom-in" onClick={() => setIsFullScreen(true)}>
+              <div className="absolute top-6 left-6 z-10 hidden sm:block">
+                <span className="px-3 py-1 bg-background/80 backdrop-blur border border-border rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                  Preview Story
+                </span>
+              </div>
               <img src={previewUrl} alt="Hadis Preview" className="max-h-full max-w-full object-contain rounded-lg shadow-2xl border border-border/50" />
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/10 rounded-lg pointer-events-none">
                 <div className="bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full flex items-center gap-2 text-xs font-medium">

@@ -16,6 +16,25 @@ interface GenerateImageProps {
   customTextColor?: string;
 }
 
+// Helper for older browsers that don't support roundRect
+const drawRoundedRect = (ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) => {
+  if (ctx.roundRect) {
+    ctx.roundRect(x, y, width, height, radius);
+  } else {
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
+    ctx.closePath();
+  }
+};
+
 const THEMES: Record<ShareTheme, { bg: string[], primary: string, secondary: string, text: string, accent: string, pattern: boolean }> = {
   midnight: {
     bg: ["#020617", "#0f172a", "#1e293b"],
@@ -110,16 +129,19 @@ export function useHadithCanvas() {
 
     const theme = { ...(THEMES[themeKey] || THEMES.midnight) };
     
-    // Override colors if custom color is provided
     if (customTextColor) {
       theme.text = customTextColor;
-      theme.secondary = `${customTextColor}CC`; // 80% opacity
-      theme.accent = `${customTextColor}26`;    // 15% opacity for accents/boxes
-      theme.primary = customTextColor;          // Use for highlights too
+      theme.secondary = `${customTextColor}CC`;
+      theme.accent = `${customTextColor}26`;
+      theme.primary = customTextColor;
     }
+
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    if (!ctx) {
+      setIsGenerating(false);
+      return;
+    }
 
     const width = 1080;
     const padding = 80;
@@ -135,7 +157,7 @@ export function useHadithCanvas() {
       footer: 150
     };
 
-    currentHeight += 250; // Logo + ID space
+    currentHeight += 250; 
 
     const wrapText = (
       text: string, 
@@ -177,36 +199,32 @@ export function useHadithCanvas() {
       return linesCount * lineHeight;
     };
 
-    // Calculate Arabic Height
     let arabicHeight = 0;
     if (showArabic && textArabic) {
       ctx.font = `80px ${arabicFont}`;
       arabicHeight = wrapText(textArabic, ctx, maxWidth, 140, false, 0, 0, true);
     }
 
-    // Calculate Translation Height
     let translationHeight = 0;
     if (showTranslation && translation) {
       ctx.font = `italic 36px ${sansFont}`;
       translationHeight = wrapText(translation, ctx, maxWidth, 55, false);
     }
 
-    // Calculate Takhrij & Grade Height
-    let footerHeight = 0;
+    let midHeight = 0;
     if (showGrade && (grade || takhrij)) {
-      footerHeight = 120;
+      midHeight = 120;
     }
 
     let totalHeight = currentHeight;
     if (showArabic && textArabic) totalHeight += arabicHeight + margins.arabic;
     if (showArabic && showTranslation && textArabic && translation) totalHeight += margins.separator;
     if (showTranslation && translation) totalHeight += translationHeight + margins.translation;
-    totalHeight += footerHeight + margins.footer;
+    totalHeight += midHeight + margins.footer;
 
     canvas.width = width;
     canvas.height = Math.max(1920, totalHeight);
 
-    // Draw Background
     const drawBg = () => {
       const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
       gradient.addColorStop(0, theme.bg[0]);
@@ -215,7 +233,7 @@ export function useHadithCanvas() {
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      if (theme.pattern) {
+      if (theme.pattern && themeKey !== 'custom') {
         ctx.save();
         ctx.globalAlpha = 0.07;
         ctx.strokeStyle = theme.primary;
@@ -230,24 +248,36 @@ export function useHadithCanvas() {
         }
         ctx.restore();
       }
+
+      if (themeKey !== 'minimal' && themeKey !== 'custom') {
+        ctx.save();
+        ctx.globalAlpha = 0.15;
+        ctx.fillStyle = theme.primary;
+        ctx.filter = "blur(120px)";
+        ctx.beginPath(); ctx.arc(canvas.width, 0, 800, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(0, canvas.height, 600, 0, Math.PI * 2); ctx.fill();
+        ctx.filter = "none";
+        ctx.restore();
+      }
     };
 
     const drawCustomBg = async () => {
       if (customBg) {
         return new Promise<void>((resolve) => {
           const img = new Image();
+          img.crossOrigin = "anonymous";
           img.onload = () => {
             const scale = Math.max(canvas.width / img.width, canvas.height / img.height);
             const x = (canvas.width - img.width * scale) / 2;
             const y = (canvas.height - img.height * scale) / 2;
             ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
-            ctx.fillStyle = "rgba(0,0,0,0.4)";
+            ctx.fillStyle = "rgba(0,0,0,0.5)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             resolve();
           };
           img.onerror = () => {
-             drawBg();
-             resolve();
+            drawBg();
+            resolve();
           };
           img.src = customBg;
         });
@@ -257,9 +287,9 @@ export function useHadithCanvas() {
     };
 
     if (themeKey === 'custom' && customBg) {
-        await drawCustomBg();
+      await drawCustomBg();
     } else {
-        drawBg();
+      drawBg();
     }
 
     let cursorY = 150;
@@ -278,7 +308,10 @@ export function useHadithCanvas() {
     if (showArabic && textArabic) {
       ctx.font = `80px ${arabicFont}`;
       ctx.fillStyle = theme.text;
+      ctx.shadowColor = "rgba(0,0,0,0.3)";
+      ctx.shadowBlur = 10;
       const h = wrapText(textArabic, ctx, maxWidth, 140, true, canvas.width / 2, cursorY, true);
+      ctx.shadowBlur = 0;
       cursorY += h + margins.arabic / 2;
     }
 
@@ -289,6 +322,7 @@ export function useHadithCanvas() {
       ctx.lineTo(canvas.width / 2 + 150, cursorY);
       ctx.strokeStyle = theme.accent;
       ctx.lineWidth = 4;
+      ctx.lineCap = "round";
       ctx.stroke();
       cursorY += 100;
     }
@@ -301,24 +335,21 @@ export function useHadithCanvas() {
     }
 
     if (showGrade && (grade || takhrij)) {
-        ctx.font = `bold 32px ${sansFont}`;
-        ctx.fillStyle = theme.primary;
-        const info = [grade, takhrij].filter(Boolean).join(" • ");
-        ctx.fillText(info, canvas.width / 2, cursorY);
+      ctx.font = `bold 32px ${sansFont}`;
+      ctx.fillStyle = theme.primary;
+      const info = [grade, takhrij].filter(Boolean).join(" • ");
+      ctx.fillText(info, canvas.width / 2, cursorY);
     }
 
-    // 6. Footer
     ctx.save();
     const footerY = canvas.height - 120;
     ctx.font = `300 32px ${sansFont}`;
     ctx.textAlign = "center";
-    ctx.fillStyle = theme.secondary;
     
-    // Glassy footer pill
     if (themeKey !== 'minimal') {
       ctx.fillStyle = "rgba(255,255,255,0.05)";
       ctx.beginPath();
-      ctx.roundRect(canvas.width/2 - 200, footerY - 45, 400, 70, 35);
+      drawRoundedRect(ctx, canvas.width/2 - 200, footerY - 45, 400, 70, 35);
       ctx.fill();
     }
     
