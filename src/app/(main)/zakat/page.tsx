@@ -30,7 +30,7 @@ type ZakatType =
 
 export default function ZakatPage() {
   const [activeType, setActiveType] = useState<ZakatType>("maal");
-  const [goldPrice, setGoldPrice] = useState<number>(3100000);
+  const [goldPrice, setGoldPrice] = useState<number>(3150000);
   const [ricePrice, setRicePrice] = useState<number>(16300);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
