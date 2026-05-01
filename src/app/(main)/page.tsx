@@ -119,8 +119,9 @@ const otherMenuItems = [
     color: "bg-orange-500/10 text-orange-600",
   },
   {
-    title: "Profil Perawi",
-    description: "Biografi dan riwayat hidup para perawi hadis",
+    title: "Database Ulama dan Perawi",
+    description:
+      "Database ini mencakup lebih dari 24 ribu profil ulama dan perawi hadis yang dikompilasi dari berbagai kitab rujukan utama Ilmu Rijalul Hadis.",
     icon: Users,
     href: "/scholars",
     color: "bg-indigo-500/10 text-indigo-600",
@@ -128,7 +129,9 @@ const otherMenuItems = [
 ];
 
 export default function DashboardPage() {
-  const [activeMenu, setActiveMenu] = useState<"main" | "quran" | "others">("main");
+  const [activeMenu, setActiveMenu] = useState<"main" | "quran" | "others">(
+    "main",
+  );
 
   const getMenuTitle = () => {
     switch (activeMenu) {
@@ -185,7 +188,9 @@ export default function DashboardPage() {
                 <button
                   key={(item as any).id}
                   onClick={() =>
-                    setActiveMenu((item as any).id === "quran" ? "quran" : "others")
+                    setActiveMenu(
+                      (item as any).id === "quran" ? "quran" : "others",
+                    )
                   }
                   className="group p-4 md:p-6 text-left rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all"
                 >
@@ -257,4 +262,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

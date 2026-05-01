@@ -1,14 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { 
-  Users, 
-  Search, 
-  Info, 
-  ExternalLink, 
-  ShieldCheck, 
-  History, 
-  BookOpen, 
+import {
+  Users,
+  Search,
+  Info,
+  ExternalLink,
+  ShieldCheck,
+  History,
+  BookOpen,
   Loader2,
   X,
   ChevronRight,
@@ -16,15 +16,15 @@ import {
   Star,
   ChevronLeft,
   ChevronsLeft,
-  ChevronsRight
+  ChevronsRight,
 } from "lucide-react";
 import Link from "next/link";
-import { 
-  browsePerawi, 
-  getPerawiById, 
-  PerawiBrowseEntry, 
-  PerawiDetail, 
-  HadisEncPaging 
+import {
+  browsePerawi,
+  getPerawiById,
+  PerawiBrowseEntry,
+  PerawiDetail,
+  HadisEncPaging,
 } from "@/lib/hadith-service";
 
 interface PerawiMeta {
@@ -79,13 +79,19 @@ function PerawiDetailModal({
               {perawi.name?.charAt(0) || "?"}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-2xl font-bold truncate">{perawi.name || "Tidak diketahui"}</h4>
+              <h4 className="text-2xl font-bold truncate">
+                {perawi.name || "Tidak diketahui"}
+              </h4>
               {perawi.grade && (
                 <div className="flex items-center gap-2 mt-1">
                   <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider">
                     {perawi.grade}
                   </span>
-                  {perawi.tags && <span className="text-xs text-muted-foreground">• {perawi.tags}</span>}
+                  {perawi.tags && (
+                    <span className="text-xs text-muted-foreground">
+                      • {perawi.tags}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
@@ -93,7 +99,10 @@ function PerawiDetailModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
             {infoItems.map((item) => (
-              <div key={item.label} className="p-4 rounded-2xl bg-accent/40 border border-border/50 group hover:border-primary/30 transition-colors">
+              <div
+                key={item.label}
+                className="p-4 rounded-2xl bg-accent/40 border border-border/50 group hover:border-primary/30 transition-colors"
+              >
                 <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 group-hover:text-primary transition-colors">
                   {item.label}
                 </p>
@@ -107,7 +116,9 @@ function PerawiDetailModal({
           {infoItems.length === 0 && (
             <div className="py-12 text-center space-y-3">
               <Info className="w-12 h-12 text-muted-foreground mx-auto opacity-20" />
-              <p className="text-muted-foreground">Informasi biografi detail belum tersedia.</p>
+              <p className="text-muted-foreground">
+                Informasi biografi detail belum tersedia.
+              </p>
             </div>
           )}
         </div>
@@ -122,7 +133,9 @@ export default function ScholarsIndex() {
   const [isListLoading, setIsListLoading] = useState(false);
   const [rawiList, setRawiList] = useState<PerawiBrowseEntry[]>([]);
   const [paging, setPaging] = useState<HadisEncPaging | null>(null);
-  const [selectedPerawi, setSelectedPerawi] = useState<PerawiDetail | null>(null);
+  const [selectedPerawi, setSelectedPerawi] = useState<PerawiDetail | null>(
+    null,
+  );
   const [isDetailLoading, setIsDetailLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -175,10 +188,12 @@ export default function ScholarsIndex() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-3xl md:text-5xl font-bold tracking-tight">
-              Profil <span className="text-primary italic">Perawi</span>
+              Database{" "}
+              <span className="text-primary italic">Ulama dan Perawi</span>
             </h1>
             <p className="text-muted-foreground max-w-2xl">
-              Database komprehensif biografi perawi hadis, sanad keilmuan, dan derajat kredibilitas para ulama hadis.
+              Database komprehensif biografi perawi hadis, sanad keilmuan, dan
+              derajat kredibilitas para ulama hadis.
             </p>
           </div>
           {meta && (
@@ -187,7 +202,9 @@ export default function ScholarsIndex() {
                 <Database className="w-3 h-3" />
                 {meta.total.toLocaleString("id-ID")} Data Perawi
               </div>
-              <p className="text-[10px] text-muted-foreground italic">Update: {meta.last_update}</p>
+              <p className="text-[10px] text-muted-foreground italic">
+                Update: {meta.last_update}
+              </p>
             </div>
           )}
         </div>
@@ -215,7 +232,9 @@ export default function ScholarsIndex() {
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <Loader2 className="w-10 h-10 animate-spin text-primary" />
-          <p className="text-muted-foreground animate-pulse">Menghubungkan ke database perawi...</p>
+          <p className="text-muted-foreground animate-pulse">
+            Menghubungkan ke database perawi...
+          </p>
         </div>
       ) : (
         <div className="space-y-12">
@@ -230,7 +249,8 @@ export default function ScholarsIndex() {
               <div className="space-y-2">
                 <h2 className="text-2xl font-bold">Lini Masa Perawi</h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Telusuri riwayat hidup para perawi dari masa Sahabat, Tabi'in, hingga Tabi'ut Tabi'in secara kronologis.
+                  Telusuri riwayat hidup para perawi dari masa Sahabat, Tabi'in,
+                  hingga Tabi'ut Tabi'in secara kronologis.
                 </p>
               </div>
               <button className="flex items-center gap-2 text-primary font-bold text-sm hover:underline">
@@ -246,9 +266,12 @@ export default function ScholarsIndex() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div className="space-y-2">
-                <h2 className="text-2xl font-bold">Kredibilitas (Jarh wa Ta'dil)</h2>
+                <h2 className="text-2xl font-bold">
+                  Kredibilitas (Jarh wa Ta'dil)
+                </h2>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Pelajari penilaian ulama terhadap kepribadian dan hafalan para perawi untuk menentukan keabsahan sanad.
+                  Pelajari penilaian ulama terhadap kepribadian dan hafalan para
+                  perawi untuk menentukan keabsahan sanad.
                 </p>
               </div>
               <button className="flex items-center gap-2 text-primary font-bold text-sm hover:underline">
@@ -266,18 +289,21 @@ export default function ScholarsIndex() {
                 Daftar Semua Perawi
               </h2>
             </div>
-            
+
             {isListLoading ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...Array(9)].map((_, i) => (
-                  <div key={i} className="h-24 rounded-2xl bg-accent/20 animate-pulse border border-border/50" />
+                  <div
+                    key={i}
+                    className="h-24 rounded-2xl bg-accent/20 animate-pulse border border-border/50"
+                  />
                 ))}
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {rawiList.map((r) => (
-                  <button 
-                    key={r.id} 
+                  <button
+                    key={r.id}
                     onClick={() => fetchDetail(r.id)}
                     className="group p-5 rounded-2xl border border-border bg-card hover:border-primary/50 hover:shadow-lg transition-all text-left relative overflow-hidden"
                   >
@@ -286,9 +312,19 @@ export default function ScholarsIndex() {
                         {r.name?.charAt(0) || "?"}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-bold truncate group-hover:text-primary transition-colors">{r.name || `Perawi #${r.id}`}</h3>
-                        {r.grade && <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">{r.grade}</p>}
-                        {r.tags && <p className="text-[10px] text-primary/70 truncate mt-0.5">{r.tags}</p>}
+                        <h3 className="text-sm font-bold truncate group-hover:text-primary transition-colors">
+                          {r.name || `Perawi #${r.id}`}
+                        </h3>
+                        {r.grade && (
+                          <p className="text-[10px] text-muted-foreground truncate uppercase tracking-wider">
+                            {r.grade}
+                          </p>
+                        )}
+                        {r.tags && (
+                          <p className="text-[10px] text-primary/70 truncate mt-0.5">
+                            {r.tags}
+                          </p>
+                        )}
                       </div>
                       <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors flex-shrink-0" />
                     </div>
@@ -329,7 +365,9 @@ export default function ScholarsIndex() {
                 </button>
                 <button
                   onClick={() => fetchRawi(paging.total_pages)}
-                  disabled={paging.current === paging.total_pages || isListLoading}
+                  disabled={
+                    paging.current === paging.total_pages || isListLoading
+                  }
                   className="p-2 rounded-xl border border-border bg-card hover:bg-accent disabled:opacity-30 transition-all"
                   title="Halaman Terakhir"
                 >
@@ -347,45 +385,58 @@ export default function ScholarsIndex() {
                 </div>
                 <h3 className="text-2xl font-bold">Tentang Database</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed italic">
-                  Database ini mencakup lebih dari 24 ribu profil ulama dan perawi hadis yang dikompilasi dari berbagai kitab rujukan utama Ilmu Rijalul Hadis.
+                  Database ini mencakup lebih dari 24 ribu profil ulama dan
+                  perawi hadis yang dikompilasi dari berbagai kitab rujukan
+                  utama Ilmu Rijalul Hadis.
                 </p>
                 <div className="space-y-2 pt-4">
-                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Sumber Data</p>
-                  <a 
-                    href={meta?.sumber || "#"} 
-                    target="_blank" 
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                    Sumber Data
+                  </p>
+                  <a
+                    href={meta?.sumber || "#"}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-xs text-indigo-600 hover:underline"
                   >
-                    Islamic Scholars Dataset (HuggingFace) <ExternalLink className="w-3 h-3" />
+                    Islamic Scholars Dataset (HuggingFace){" "}
+                    <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
               </div>
-              
+
               <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-colors space-y-3">
                   <div className="flex items-center gap-2 text-primary font-bold text-sm">
                     <BookOpen className="w-4 h-4" /> Sahabat Nabi
                   </div>
-                  <p className="text-xs text-muted-foreground">Perawi yang bertemu langsung dengan Rasulullah ﷺ.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Perawi yang bertemu langsung dengan Rasulullah ﷺ.
+                  </p>
                 </div>
                 <div className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-colors space-y-3">
                   <div className="flex items-center gap-2 text-primary font-bold text-sm">
                     <BookOpen className="w-4 h-4" /> Tabi'in
                   </div>
-                  <p className="text-xs text-muted-foreground">Murid dari para Sahabat Nabi yang meneruskan sanad.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Murid dari para Sahabat Nabi yang meneruskan sanad.
+                  </p>
                 </div>
                 <div className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-colors space-y-3">
                   <div className="flex items-center gap-2 text-primary font-bold text-sm">
                     <BookOpen className="w-4 h-4" /> Aimmah Sitta
                   </div>
-                  <p className="text-xs text-muted-foreground">6 penyusun kitab hadis utama (Bukhari, Muslim, dsb).</p>
+                  <p className="text-xs text-muted-foreground">
+                    6 penyusun kitab hadis utama (Bukhari, Muslim, dsb).
+                  </p>
                 </div>
                 <div className="p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-colors space-y-3">
                   <div className="flex items-center gap-2 text-primary font-bold text-sm">
                     <BookOpen className="w-4 h-4" /> Ulama Salaf
                   </div>
-                  <p className="text-xs text-muted-foreground">Ulama generasi awal yang menjaga kemurnian ilmu hadis.</p>
+                  <p className="text-xs text-muted-foreground">
+                    Ulama generasi awal yang menjaga kemurnian ilmu hadis.
+                  </p>
                 </div>
               </div>
             </div>
@@ -402,7 +453,10 @@ export default function ScholarsIndex() {
         </div>
       )}
 
-      <PerawiDetailModal perawi={selectedPerawi} onClose={() => setSelectedPerawi(null)} />
+      <PerawiDetailModal
+        perawi={selectedPerawi}
+        onClose={() => setSelectedPerawi(null)}
+      />
     </div>
   );
 }
