@@ -101,13 +101,18 @@ export default function DzikirPage() {
   // Initialize Audio Context on first interaction
   const getAudioContext = () => {
     if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext ||
-        (window as any).webkitAudioContext)();
+      audioContextRef.current = new (
+        window.AudioContext || (window as any).webkitAudioContext
+      )();
     }
     return audioContextRef.current;
   };
 
-  const playBeep = (freq = 440, duration = 0.1, type: OscillatorType = "sine") => {
+  const playBeep = (
+    freq = 440,
+    duration = 0.1,
+    type: OscillatorType = "sine",
+  ) => {
     if (!soundOn) return;
     try {
       const ctx = getAudioContext();
@@ -122,7 +127,7 @@ export default function DzikirPage() {
       gainNode.gain.setValueAtTime(0.15, ctx.currentTime);
       gainNode.gain.exponentialRampToValueAtTime(
         0.0001,
-        ctx.currentTime + duration
+        ctx.currentTime + duration,
       );
 
       oscillator.connect(gainNode);
@@ -169,7 +174,7 @@ export default function DzikirPage() {
     if (nextCount === target) {
       // Target reached!
       playBeep(880, 0.3, "triangle");
-      
+
       if (navigator.vibrate) {
         if (isAssistActive && isLastItem) {
           navigator.vibrate([200, 100, 200, 100, 200, 100, 500]);
@@ -195,24 +200,34 @@ export default function DzikirPage() {
     <div className="max-w-4xl mx-auto min-h-[85vh] flex flex-col items-center justify-center p-4 space-y-6 animate-in fade-in duration-500 pb-20">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">📿 Tasbih Digital</h1>
-        <p className="text-muted-foreground text-sm">Berdzikir dengan tenang dan fokus</p>
+        <p className="text-muted-foreground text-sm">
+          Berdzikir dengan tenang dan fokus
+        </p>
       </div>
 
       {/* Utility Controls - Moved Outside as requested */}
       <div className="flex items-center gap-3">
-        <button 
+        <button
           onClick={toggleSound}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shadow-sm",
-            soundOn ? "bg-primary/10 border-primary/20 text-primary" : "bg-card border-border text-muted-foreground"
+            soundOn
+              ? "bg-primary/10 border-primary/20 text-primary"
+              : "bg-card border-border text-muted-foreground",
           )}
           title={soundOn ? "Matikan Suara" : "Aktifkan Suara"}
         >
-          {soundOn ? <Volume2 className="w-5 h-5" /> : <VolumeX className="w-5 h-5" />}
-          <span className="text-xs font-semibold">{soundOn ? "On" : "Off"}</span>
+          {soundOn ? (
+            <Volume2 className="w-5 h-5" />
+          ) : (
+            <VolumeX className="w-5 h-5" />
+          )}
+          <span className="text-xs font-semibold">
+            {soundOn ? "On" : "Off"}
+          </span>
         </button>
-        
-        <button 
+
+        <button
           onClick={reset}
           className="flex items-center gap-2 px-4 py-2 rounded-xl border border-border bg-card text-muted-foreground hover:bg-accent transition-all shadow-sm active:scale-95"
           title="Reset Hitungan"
@@ -221,11 +236,13 @@ export default function DzikirPage() {
           <span className="text-xs font-semibold">Reset</span>
         </button>
 
-        <button 
+        <button
           onClick={() => setIsAssistModalOpen(true)}
           className={cn(
             "flex items-center gap-2 px-4 py-2 rounded-xl border transition-all shadow-sm",
-            isAssistActive ? "bg-amber-500/10 border-amber-500/20 text-amber-600" : "bg-card border-border text-muted-foreground"
+            isAssistActive
+              ? "bg-amber-500/10 border-amber-500/20 text-amber-600"
+              : "bg-card border-border text-muted-foreground",
           )}
         >
           <Sparkles className="w-5 h-5" />
@@ -241,17 +258,20 @@ export default function DzikirPage() {
               {currentCategory?.name}
             </span>
             <div className="flex gap-2">
-               <button 
+              <button
                 onClick={handleNextAssist}
                 className="p-1 hover:bg-accent rounded-full text-muted-foreground"
                 title="Dzikir Selanjutnya"
-               >
-                 <ChevronRight className="w-4 h-4" />
-               </button>
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
           <div className="text-center space-y-4">
-            <div className="font-arabic text-2xl md:text-3xl leading-relaxed text-foreground drop-shadow-sm" dir="rtl">
+            <div
+              className="font-arabic text-2xl md:text-3xl leading-relaxed text-foreground drop-shadow-sm"
+              dir="rtl"
+            >
               {currentDzikirItem.arabic}
             </div>
             <p className="text-sm text-muted-foreground italic px-4">
@@ -268,7 +288,9 @@ export default function DzikirPage() {
             onClick={() => setMode("manual")}
             className={cn(
               "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-              mode === "manual" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:bg-accent"
+              mode === "manual"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:bg-accent",
             )}
           >
             Manual
@@ -277,7 +299,9 @@ export default function DzikirPage() {
             onClick={() => setMode("cycle")}
             className={cn(
               "px-4 py-2 rounded-lg text-sm font-medium transition-all",
-              mode === "cycle" ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:bg-accent"
+              mode === "cycle"
+                ? "bg-primary text-primary-foreground shadow-md"
+                : "text-muted-foreground hover:bg-accent",
             )}
           >
             Siklus (33x)
@@ -286,12 +310,14 @@ export default function DzikirPage() {
       )}
 
       {/* Main Counter Card */}
-      <div className={cn(
-        "relative w-full max-w-sm aspect-square flex flex-col items-center justify-center rounded-[3.5rem] border-4 transition-all duration-500",
-        isTargetReached 
-          ? "border-primary bg-primary/5 shadow-[0_0_50px_rgba(var(--primary-rgb),0.2)]" 
-          : "border-border bg-card/30 backdrop-blur-xl shadow-2xl"
-      )}>
+      <div
+        className={cn(
+          "relative w-full max-w-sm aspect-square flex flex-col items-center justify-center rounded-[3.5rem] border-4 transition-all duration-500",
+          isTargetReached
+            ? "border-primary bg-primary/5 shadow-[0_0_50px_rgba(var(--primary-rgb),0.2)]"
+            : "border-border bg-card/30 backdrop-blur-xl shadow-2xl",
+        )}
+      >
         {/* Info */}
         <div className="absolute top-12 text-center animate-in slide-in-from-top-4">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-primary drop-shadow-sm">
@@ -305,11 +331,15 @@ export default function DzikirPage() {
         </div>
 
         {/* Counter Display */}
-        <div className={cn(
-          "text-9xl font-black tabular-nums transition-all duration-700",
-          isAnimating ? "scale-105" : "scale-100",
-          isTargetReached ? "text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]" : "text-foreground"
-        )}>
+        <div
+          className={cn(
+            "text-9xl font-black tabular-nums transition-all duration-700",
+            isAnimating ? "scale-105" : "scale-100",
+            isTargetReached
+              ? "text-primary drop-shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]"
+              : "text-foreground",
+          )}
+        >
           {counter}
         </div>
 
@@ -320,16 +350,16 @@ export default function DzikirPage() {
           </div>
           {isTargetReached && (
             <div className="flex flex-col items-center">
-               <span className="text-[10px] text-primary font-bold animate-bounce uppercase tracking-widest">
+              <span className="text-[10px] text-primary font-bold animate-bounce uppercase tracking-widest">
                 Target Tercapai!
               </span>
               {isAssistActive && (
-                 <button 
+                <button
                   onClick={handleNextAssist}
                   className="mt-2 text-[10px] font-bold text-amber-600 hover:underline flex items-center gap-1"
-                 >
-                   Lanjut ke berikutnya <ChevronRight className="w-3 h-3" />
-                 </button>
+                >
+                  Lanjut ke berikutnya <ChevronRight className="w-3 h-3" />
+                </button>
               )}
             </div>
           )}
@@ -347,21 +377,25 @@ export default function DzikirPage() {
       {!isAssistActive && (
         <div className="w-full max-w-sm grid grid-cols-2 gap-4">
           <div className="bg-card/50 backdrop-blur-md border border-border p-4 rounded-3xl flex flex-col items-center gap-3 shadow-sm">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Target</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Target
+            </span>
             <div className="flex items-center gap-4">
-               <button 
-                  onClick={() => setTarget(Math.max(1, target - 1))}
-                  className="p-1 rounded-full hover:bg-accent transition-colors"
-               >
-                 <ChevronDown className="w-4 h-4" />
-               </button>
-               <span className="text-xl font-bold min-w-[2rem] text-center">{target}</span>
-               <button 
-                  onClick={() => setTarget(target + 1)}
-                  className="p-1 rounded-full hover:bg-accent transition-colors"
-               >
-                 <ChevronUp className="w-4 h-4" />
-               </button>
+              <button
+                onClick={() => setTarget(Math.max(1, target - 1))}
+                className="p-1 rounded-full hover:bg-accent transition-colors"
+              >
+                <ChevronDown className="w-4 h-4" />
+              </button>
+              <span className="text-xl font-bold min-w-[2rem] text-center">
+                {target}
+              </span>
+              <button
+                onClick={() => setTarget(target + 1)}
+                className="p-1 rounded-full hover:bg-accent transition-colors"
+              >
+                <ChevronUp className="w-4 h-4" />
+              </button>
             </div>
             <div className="flex gap-2">
               {[33, 99, 100].map((t) => (
@@ -370,7 +404,9 @@ export default function DzikirPage() {
                   onClick={() => setTarget(t)}
                   className={cn(
                     "px-2 py-0.5 rounded text-[10px] font-bold border transition-all",
-                    target === t ? "bg-primary border-primary text-primary-foreground" : "border-border hover:bg-accent"
+                    target === t
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : "border-border hover:bg-accent",
                   )}
                 >
                   {t}
@@ -380,7 +416,9 @@ export default function DzikirPage() {
           </div>
 
           <div className="bg-card/50 backdrop-blur-md border border-border p-4 rounded-3xl flex flex-col items-center gap-3 shadow-sm">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Koreksi</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              Koreksi
+            </span>
             <div className="flex items-center gap-2">
               <button
                 onClick={decrement}
@@ -390,7 +428,9 @@ export default function DzikirPage() {
                 <ChevronDown className="w-6 h-6" />
               </button>
             </div>
-            <span className="text-[10px] text-muted-foreground text-center opacity-70">Tekan jika berlebih</span>
+            <span className="text-[10px] text-muted-foreground text-center opacity-70">
+              Tekan jika berlebih
+            </span>
           </div>
         </div>
       )}
@@ -399,68 +439,79 @@ export default function DzikirPage() {
       {isAssistModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="w-full max-w-md bg-card border border-border rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-             <div className="p-6 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                   <Sparkles className="w-5 h-5 text-amber-500" />
-                   <h2 className="text-lg font-bold">Pengaturan Assist</h2>
-                </div>
-                <button onClick={() => setIsAssistModalOpen(false)} className="p-2 hover:bg-accent rounded-full">
-                   <X className="w-5 h-5" />
-                </button>
-             </div>
-             
-             <div className="p-6 overflow-y-auto space-y-6">
-                <div className="flex items-center justify-between p-4 bg-accent/30 rounded-2xl border border-primary/10">
-                   <div>
-                      <p className="font-bold text-sm">Aktifkan Mode Assist</p>
-                      <p className="text-xs text-muted-foreground">Tampilkan teks dzikir sahih</p>
-                   </div>
-                   <button 
-                    onClick={toggleAssist}
-                    className={cn(
-                      "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                      isAssistActive ? "bg-primary" : "bg-muted"
-                    )}
-                   >
-                     <span className={cn(
-                       "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
-                       isAssistActive ? "translate-x-5" : "translate-x-0"
-                     )} />
-                   </button>
-                </div>
+            <div className="p-6 border-b border-border flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-amber-500" />
+                <h2 className="text-lg font-bold">Pengaturan Assist</h2>
+              </div>
+              <button
+                onClick={() => setIsAssistModalOpen(false)}
+                className="p-2 hover:bg-accent rounded-full"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-                {isAssistActive && (
-                  <div className="space-y-4 animate-in slide-in-from-bottom-2">
-                     <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-2">Pilih Kategori</p>
-                     <div className="grid grid-cols-1 gap-2">
-                        {dzikirData.map((cat: DzikirCategory) => (
-                           <button
-                            key={cat.id}
-                            onClick={() => setAssistCategory(cat.id)}
-                            className={cn(
-                              "p-4 rounded-2xl border text-left transition-all",
-                              assistCategoryId === cat.id 
-                                ? "border-primary bg-primary/5 ring-1 ring-primary" 
-                                : "border-border hover:bg-accent"
-                            )}
-                           >
-                             <p className="font-bold text-sm">{cat.name}</p>
-                             <p className="text-[10px] text-muted-foreground mt-1">{cat.items.length} Dzikir Sahih</p>
-                           </button>
-                        ))}
-                     </div>
-                  </div>
-                )}
-             </div>
-
-             <div className="p-6 border-t border-border bg-accent/10">
-                <button 
-                  onClick={() => setIsAssistModalOpen(false)}
-                  className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+            <div className="p-6 overflow-y-auto space-y-6">
+              <div className="flex items-center justify-between p-4 bg-accent/30 rounded-2xl border border-primary/10">
+                <div>
+                  <p className="font-bold text-sm">Aktifkan Mode Assist</p>
+                  <p className="text-xs text-muted-foreground">
+                    Tampilkan teks dzikir sahih
+                  </p>
+                </div>
+                <button
+                  onClick={toggleAssist}
+                  className={cn(
+                    "relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    isAssistActive ? "bg-primary" : "bg-muted",
+                  )}
                 >
-                  Selesai
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out",
+                      isAssistActive ? "translate-x-5" : "translate-x-0",
+                    )}
+                  />
                 </button>
-             </div>
+              </div>
+
+              {isAssistActive && (
+                <div className="space-y-4 animate-in slide-in-from-bottom-2">
+                  <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground px-2">
+                    Pilih Kategori
+                  </p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {dzikirData.map((cat: DzikirCategory) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setAssistCategory(cat.id)}
+                        className={cn(
+                          "p-4 rounded-2xl border text-left transition-all",
+                          assistCategoryId === cat.id
+                            ? "border-primary bg-primary/5 ring-1 ring-primary"
+                            : "border-border hover:bg-accent",
+                        )}
+                      >
+                        <p className="font-bold text-sm">{cat.name}</p>
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          {cat.items.length} Dzikir Sahih
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-border bg-accent/10">
+              <button
+                onClick={() => setIsAssistModalOpen(false)}
+                className="w-full py-3 bg-primary text-primary-foreground rounded-2xl font-bold shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+              >
+                Selesai
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -474,10 +525,12 @@ export default function DzikirPage() {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold">Masa Allah!</h2>
-              <p className="text-muted-foreground">Anda telah menyelesaikan seluruh rangkaian dzikir ini.</p>
+              <p className="text-muted-foreground">
+                Anda telah menyelesaikan seluruh rangkaian dzikir ini.
+              </p>
             </div>
             <div className="pt-4  space-y-3">
-              <button 
+              <button
                 onClick={() => {
                   setShowFinishedModal(false);
                   setAssistDzikir(currentCategory?.items[0].id || null);
@@ -488,7 +541,7 @@ export default function DzikirPage() {
                 <RefreshCw className="w-5 h-5" />
                 Ulangi Kategori
               </button>
-              <button 
+              <button
                 onClick={() => {
                   setShowFinishedModal(false);
                   toggleAssist();
@@ -504,7 +557,8 @@ export default function DzikirPage() {
 
       {/* Guide/Hint */}
       <div className="text-center text-[10px] text-muted-foreground max-w-xs leading-relaxed opacity-60">
-        Klik di mana saja pada kotak besar untuk menambah hitungan. Assist membantu anda menghafal dzikir sesuai sunnah.
+        Klik di mana saja pada kotak besar untuk menambah hitungan. Assist
+        membantu anda menghafal dzikir sesuai sunnah.
       </div>
     </div>
   );

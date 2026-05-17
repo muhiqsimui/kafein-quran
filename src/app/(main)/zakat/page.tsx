@@ -30,6 +30,7 @@ type ZakatType =
 export default function ZakatPage() {
   const [activeType, setActiveType] = useState<ZakatType>("maal");
   const [goldPrice, setGoldPrice] = useState<number>(3150000);
+  const [silverPrice, setSilverPrice] = useState<number>(18500);
   const [ricePrice, setRicePrice] = useState<number>(16300);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -177,8 +178,10 @@ export default function ZakatPage() {
       }
       case "emas": {
         const goldZakat = goldWeight >= 85 ? goldWeight * goldPrice * 0.025 : 0;
+        // SEKARANG AKURAT: Menggunakan silverPrice asli, bukan persentase harga emas
         const silverZakat =
-          silverWeight >= 595 ? silverWeight * (goldPrice * 0.015) * 0.025 : 0; // rough silver price
+          silverWeight >= 595 ? silverWeight * silverPrice * 0.025 : 0;
+
         return {
           goldZakat,
           silverZakat,
@@ -235,6 +238,7 @@ export default function ZakatPage() {
     irrigationType,
     agricultureType,
     goldPrice,
+    silverPrice,
     ricePrice,
   ]);
 
@@ -760,38 +764,64 @@ export default function ZakatPage() {
             )}
 
             {activeType === "emas" && (
-              <>
+              <div className="space-y-5 animate-in fade-in duration-300">
+                {/* Input Emas */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium text-foreground">
                     Berat Emas (Gram)
                   </label>
                   <input
                     type="number"
                     value={goldWeight || ""}
                     onChange={(e) => setGoldWeight(Number(e.target.value))}
-                    className="w-full p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm"
                     placeholder="0"
                   />
-                  <p className="text-[10px] text-muted-foreground italic">
-                    *Nisab Emas 85gr
+                  <p className="text-[10px] text-muted-foreground italic pl-1">
+                    *Nisab Emas 85 gram
                   </p>
                 </div>
+
+                {/* Pembatas Visual Halus */}
+                <div className="border-t border-border/60 my-3" />
+
+                {/* Input Harga Perak */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">
+                  <label className="text-sm font-medium text-foreground">
+                    Estimasi Harga Perak / Gram
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
+                      Rp
+                    </span>
+                    <input
+                      type="text"
+                      value={formatWithDots(silverPrice)}
+                      onChange={(e) =>
+                        setSilverPrice(parseDots(e.target.value))
+                      }
+                      className="w-full pl-10 p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm font-bold"
+                    />
+                  </div>
+                </div>
+
+                {/* Input Berat Perak */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">
                     Berat Perak (Gram)
                   </label>
                   <input
                     type="number"
                     value={silverWeight || ""}
                     onChange={(e) => setSilverWeight(Number(e.target.value))}
-                    className="w-full p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20"
+                    className="w-full p-3 rounded-xl bg-accent/50 border border-border outline-none focus:ring-2 focus:ring-primary/20 text-sm"
                     placeholder="0"
                   />
-                  <p className="text-[10px] text-muted-foreground italic">
-                    *Nisab Perak 595gr
+                  <p className="text-[10px] text-muted-foreground italic pl-1">
+                    *Nisab Perak 595 gram
                   </p>
                 </div>
-              </>
+              </div>
             )}
 
             {activeType === "pertanian" && (
