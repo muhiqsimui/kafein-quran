@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+// 1. UBAH: Tambahkan useEffect pada import React
+import { useState, useMemo, useEffect } from "react";
 import {
   Wallet,
   ChevronLeft,
@@ -10,8 +11,6 @@ import {
   Briefcase,
   LandPlot,
   UserRound,
-  ArrowRight,
-  RefreshCcw,
   CheckCircle2,
   LucideIcon,
   ChevronDown,
@@ -44,6 +43,30 @@ export default function ZakatPage() {
   const [savings, setSavings] = useState<number>(0);
   const [investments, setInvestments] = useState<number>(0);
   const [property, setProperty] = useState<number>(0);
+
+  // TAMBAH: Logika Fetching API dengan Fallback Harga Default
+  useEffect(() => {
+    fetch("/api/gold")
+      .then((res) => {
+        if (!res.ok) throw new Error("Gagal mengambil data dari API");
+        return res.json();
+      })
+      .then((data) => {
+        if (data && data.buyback) {
+          setGoldPrice(data.buyback);
+        } else {
+          throw new Error("Format data API tidak sesuai");
+        }
+      })
+      .catch((err) => {
+        console.error(
+          "Gagal memuat harga emas otomatis, menggunakan harga default:",
+          err,
+        );
+        // JIKA API GAGAL: Set ke harga default
+        setGoldPrice(3000000);
+      });
+  }, []);
 
   // Zakat Fitrah State
   const [personCount, setPersonCount] = useState<number>(1);
@@ -323,9 +346,7 @@ export default function ZakatPage() {
       )}
 
       {/* Header */}
-      {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        {/* Left section */}
         <div className="flex items-center gap-3">
           <Link
             href="/"
@@ -345,7 +366,6 @@ export default function ZakatPage() {
           </div>
         </div>
 
-        {/* Right section */}
         <button
           onClick={() => setIsModalOpen(true)}
           className="inline-flex items-center justify-center gap-2
@@ -362,8 +382,7 @@ export default function ZakatPage() {
       <div className="bg-card p-6 rounded-3xl border border-border space-y-4 shadow-sm">
         <div className="flex items-center justify-between">
           <h3 className="font-bold flex items-center gap-2">
-            <RefreshCcw className="w-4 h-4 text-primary" />
-            Harga Pasar Terkini
+            Sesuaikan Harga Emas dan Beras
           </h3>
           <span className="text-[10px] text-muted-foreground bg-accent px-2 py-1 rounded-full">
             Konfigurasi Manual
@@ -372,7 +391,7 @@ export default function ZakatPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-              Estimasi Harga Emas / Gram
+              Harga Jual Emas / Gram
             </label>
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground font-medium">
@@ -433,13 +452,15 @@ export default function ZakatPage() {
               "flex flex-col items-center gap-2 p-3 rounded-xl border transition-all text-center",
               activeType === item.id
                 ? "bg-primary text-primary-foreground border-primary shadow-md"
-                : "bg-card border-border hover:border-primary/50",
+                : "bg-card text-card-foreground border-border hover:border-primary/50 hover:bg-accent/50", // Ditambahkan warna teks & hover state agar serasi dengan Shadcn style
             )}
           >
             <item.icon
               className={cn(
-                "w-5 h-5",
-                activeType === item.id ? "text-white" : "text-primary",
+                "w-5 h-5 transition-colors",
+                activeType === item.id
+                  ? "text-primary-foreground" // Menggunakan text-primary-foreground agar selalu kontras dengan warna bg-primary
+                  : "text-muted-foreground group-hover:text-foreground", // Menggunakan text-muted-foreground agar tetap terlihat jelas baik di light maupun dark mode
               )}
             />
             <span className="text-[10px] md:text-xs font-medium">
@@ -1008,6 +1029,7 @@ export default function ZakatPage() {
               </p>
             )}
           </div>
+
           {/* Catatan Fiqh */}
           <div className="p-4 rounded-xl border bg-muted/50 space-y-2">
             <h4 className="flex items-center gap-2 text-sm font-semibold text-foreground">
@@ -1102,8 +1124,6 @@ export default function ZakatPage() {
               </p>
             )}
           </div>
-
-          {/* Penutup Catatan */}
         </div>
       </div>
     </div>
