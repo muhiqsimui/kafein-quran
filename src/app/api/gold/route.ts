@@ -1,4 +1,3 @@
-// src/app/api/gold/route.ts
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -7,20 +6,32 @@ export async function GET() {
       "https://gold.kafein.web.id/api/v1/gold/latest",
       {
         next: {
-          revalidate: 3600, // Menyimpan cache selama 3600 detik (1 jam)
+          revalidate: 3600, // Cache 1 jam
         },
       },
     );
 
     if (!response.ok) {
       return NextResponse.json(
-        { error: "Gagal mengambil data" },
+        { error: "Gagal mengambil data dari penyedia" },
         { status: 500 },
       );
     }
 
-    const data = await response.json();
-    return NextResponse.json(data);
+    const res = await response.json();
+
+    // Pastikan data ada sebelum dikirim
+    if (res.success && res.data) {
+      return NextResponse.json({
+        success: true,
+        price_1_gram: res.data.price_1_gram, // Data sudah rata di root object
+      });
+    }
+
+    return NextResponse.json(
+      { error: "Format data tidak valid" },
+      { status: 422 },
+    );
   } catch (error) {
     return NextResponse.json(
       { error: "Internal Server Error" },

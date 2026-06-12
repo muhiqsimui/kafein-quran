@@ -46,26 +46,26 @@ export default function ZakatPage() {
   const [property, setProperty] = useState<number>(0);
 
   // TAMBAH: Logika Fetching API dengan Fallback Harga Default
+  // LOGIKA FETCHING: Mengambil data dari API Gold Kafein
+  // LOGIKA FETCHING: Mengambil data dari API Internal (Proxy)
   useEffect(() => {
+    // Ganti URL eksternal menjadi /api/gold
     fetch("/api/gold")
       .then((res) => {
         if (!res.ok) throw new Error("Gagal mengambil data dari API");
         return res.json();
       })
       .then((data) => {
-        if (data && data.buyback) {
-          setGoldPrice(data.buyback);
-        } else {
-          throw new Error("Format data API tidak sesuai");
+        // Karena route.ts kita sudah memproses data,
+        // sekarang kita bisa langsung akses price_1_gram
+        if (data && data.price_1_gram) {
+          setGoldPrice(data.price_1_gram);
         }
       })
       .catch((err) => {
-        console.error(
-          "Gagal memuat harga emas otomatis, menggunakan harga default:",
-          err,
-        );
-        // JIKA API GAGAL: Set ke harga default
-        setGoldPrice(3000000);
+        console.error("Gagal memuat harga emas otomatis:", err);
+        // Harga fallback jika terjadi error
+        setGoldPrice(2500000);
       });
   }, []);
 
